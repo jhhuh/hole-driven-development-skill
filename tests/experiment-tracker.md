@@ -23,10 +23,10 @@
 | A2 | Typeclass-constrained (mySort) | 2 | 1 | PASS | none | 9 cycles, 8 holes, Ord used from diagnostics |
 | A3 | Higher-order multiple holes (foldMap) | 2 | 1 | PASS | none | 3 cycles, _baseCase most constrained |
 | A4 | ADT pattern matching (Expr eval) | 2 | 1 | PASS | none | 6 cycles, case-split then base-first |
-| A5 | Monadic code (State monad) | 3 | 1 | | | |
-| A6 | Parser combinator | 3 | 1 | | | |
-| A7 | Ambiguous hole (mystery) | 3 | 1 | | | |
-| A8 | Deep nesting (type checker) | 3 | 1 | | | |
+| A5 | Monadic code (State monad) | 3 | 1 | PASS | none | 12 cycles, 11 holes, MonadFail caught by compiler |
+| A6 | Parser combinator | 3 | 1 | PASS | none | 7 cycles, 6 holes, mutual recursion via forward refs |
+| A7 | Ambiguous hole (mystery) | 3 | 1 | PASS | none | Stopped after 1 cycle, identified 5+ valid impls |
+| A8 | Deep nesting (type checker) | 3 | 1 | PASS | none | 10 cycles, 9 holes, sub-holes for TmApp/TmIf |
 
 ## Suite B: Iterative Reasoning — Multi-Language
 
