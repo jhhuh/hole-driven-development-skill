@@ -300,13 +300,13 @@ Baseline [:material-file-code-outline:](https://github.com/jhhuh/hole-driven-dev
 
 | | Baseline | With HDD |
 |---|---|---|
-| **Lines** | 453 | 271 |
+| **Code lines** | 254 | 168 |
 | **AST/Type definitions** | Manual `__init__`, `__eq__`, `__hash__` | `@dataclass(frozen=True)` |
 | **Helper functions** | `_resolve()`, `_bind()` | None (logic inlined in `unify`) |
 | **Extras** | `__repr__` on all types, smoke test block | None |
 | **Algorithm** | Identical (Algorithm W) | Identical (Algorithm W) |
 
-The algorithmic core is identical — both implement Algorithm W with unification, occurs check, and let-polymorphism. The **40% size reduction** comes from the HDD agent choosing `@dataclass(frozen=True)` for type classes, which provides `__eq__` and `__hash__` for free. The baseline wrote all equality/hashing methods manually, plus `__repr__` methods and a 47-line smoke test block.
+The algorithmic core is identical — both implement Algorithm W with unification, occurs check, and let-polymorphism. The **34% code reduction** comes from the HDD agent choosing `@dataclass(frozen=True)` for type classes, which provides `__eq__` and `__hash__` for free. The baseline wrote all equality/hashing methods manually, plus `__repr__` methods and a smoke test block.
 
 `★ Insight ─────────────────────────────────────`
 The HDD decomposition (14 holes, most-constrained-first) naturally led to filling `fresh_tvar` and `ftv_type` before `unify` and `w`. This bottom-up fill order meant the agent had utility functions available when it reached the complex holes, producing cleaner code. The baseline wrote everything top-to-bottom in reading order.
@@ -318,7 +318,7 @@ Baseline [:material-file-code-outline:](https://github.com/jhhuh/hole-driven-dev
 
 | | Baseline | With HDD |
 |---|---|---|
-| **Lines** | 129 | 118 |
+| **Code lines** | 97 | 101 |
 | **Structure** | `Run()` + extracted `runStage()` function | All inline in `Run()` with HOLE comments |
 | **Worker loop** | `for item := range in` | `select` + `<-ctx.Done()` |
 | **Error handling** | Drain + continue | Return immediately on cancel |
@@ -336,14 +336,14 @@ Baseline [:material-file-code-outline:](https://github.com/jhhuh/hole-driven-dev
 
 | | Baseline | With HDD |
 |---|---|---|
-| **Lines** | 338 | 207 |
+| **Code lines** | 193 | 122 |
 | **Functions** | 6 (`_lcs_table`, `_compute_blocks`, `_collapse_equal`, `_collect_overlap_group`, `_flatten_repl`, `_ensure_newline`) | 2 (`_lcs_opcodes`, `merge3`) |
 | **Strategy** | Region-splitting: align boundaries, compare element-wise | Hunk-walking: extract change hunks, walk base with dual cursors |
 | **Complexity** | Splits equal regions at cut points from the other side | Direct interval intersection for overlap detection |
 
 **Fundamentally different architectures.** The baseline uses a region-splitting strategy — it converts diffs into regions with `is_change` flags, collects all boundary points from both sides, splits regions at those boundaries, then compares aligned regions element-wise. The HDD version uses a simpler hunk-walking strategy — it extracts only the *changed* hunks from each side, then walks the base with two cursors detecting overlaps via interval intersection.
 
-The **39% code reduction** isn't just conciseness — it reflects a genuinely simpler algorithm that emerged from the hole decomposition. The HDD agent's skeleton had 3 top-level holes (diff, extract hunks, merge walk), and the merge walk hole naturally decomposed into overlap detection + case dispatch, producing the cleaner dual-cursor approach.
+The **37% code reduction** isn't just conciseness — it reflects a genuinely simpler algorithm that emerged from the hole decomposition. The HDD agent's skeleton had 3 top-level holes (diff, extract hunks, merge walk), and the merge walk hole naturally decomposed into overlap detection + case dispatch, producing the cleaner dual-cursor approach.
 
 `★ Insight ─────────────────────────────────────`
 This is the strongest example of HDD producing a different *algorithm*, not just different style. The baseline's region-splitting approach requires 3 extra helper functions (`_collapse_equal`, `_collect_overlap_group`, `_flatten_repl`) that exist only to manage the complexity of the region-alignment strategy. HDD's hunk-walking approach avoids this complexity entirely.
@@ -355,14 +355,14 @@ Baseline [:material-file-code-outline:](https://github.com/jhhuh/hole-driven-dev
 
 | | Baseline | With HDD |
 |---|---|---|
-| **Lines** | 268 | 270 |
+| **Code lines** | 166 | 186 |
 | **Dep resolution + cycle detection** | Combined in single `_topo_sort` | Separated: `_resolve_deps`, `_detect_cycle`, `_topo_sort` |
 | **Dep coordination** | `threading.Event` per task | Polling loop with 0.001s sleep |
 | **Cache storage** | Per-file (one `.json` per cache key) | Single `cache.json` file |
 | **Cache key includes** | Task name + `inspect.getsource(fn)` + dep results | Task name + dep results |
 | **Extra features** | `invalidate()` + `_transitive_dependents()` | Dry-run mode returning `{"_dry_run": [...]}` |
 
-Similar total size but **different decomposition strategies**. The baseline combines dependency resolution and cycle detection into a single `_topo_sort` method (Kahn's algorithm detects cycles implicitly when `len(order) != len(needed)`). HDD separated these into 3 distinct functions with clear single responsibilities.
+HDD is 12% larger in code lines — **different decomposition strategies** with a size tradeoff. The baseline combines dependency resolution and cycle detection into a single `_topo_sort` method (Kahn's algorithm detects cycles implicitly when `len(order) != len(needed)`). HDD separated these into 3 distinct functions with clear single responsibilities.
 
 The baseline's `threading.Event` approach for dependency coordination is more efficient than HDD's polling loop. However, the baseline includes `inspect.getsource(fn)` in cache keys — a clever touch that detects when the function body changes, though it's fragile across Python versions and decorators.
 
@@ -372,7 +372,7 @@ Baseline [:material-file-code-outline:](https://github.com/jhhuh/hole-driven-dev
 
 | | Baseline | With HDD |
 |---|---|---|
-| **Lines** | 282 | 188 |
+| **Code lines** | 174 | 121 |
 | **Blocking strategy** | `threading.Condition` with calculated wait | Spin-sleep loops |
 | **Composite atomicity** | Two-phase locking: check all, then commit all | Rollback: acquire each, `_give_back()` on failure |
 | **Composite complexity** | ~100 lines, type-checks each limiter type | ~25 lines, type-agnostic |
@@ -388,15 +388,17 @@ The `_give_back()` pattern is a textbook example of HDD surfacing a design insig
 
 ### Phase 3 Summary
 
-| Experiment | Baseline | HDD | Size Diff | Architecture Diff |
+| Experiment | Baseline | HDD | Code Diff | Architecture Diff |
 |---|---|---|---|---|
-| H1: Type Inference | 453 lines | 271 lines | **-40%** | Same algorithm, better data class choices |
-| H2: Go Pipeline | 129 lines | 118 lines | **-9%** | Caught cancellation deadlock in review |
-| H3: Three-Way Merge | 338 lines | 207 lines | **-39%** | Fundamentally different algorithm |
-| H4: Build System | 268 lines | 270 lines | **+1%** | Cleaner separation of concerns |
-| H5: Rate Limiter | 282 lines | 188 lines | **-33%** | Discovered `_give_back` abstraction |
+| H1: Type Inference | 254 | 168 | **-34%** | Same algorithm, better data class choices |
+| H2: Go Pipeline | 97 | 101 | **+4%** | Caught cancellation deadlock in review |
+| H3: Three-Way Merge | 193 | 122 | **-37%** | Fundamentally different algorithm |
+| H4: Build System | 166 | 186 | **+12%** | Cleaner separation of concerns, more code |
+| H5: Rate Limiter | 174 | 121 | **-30%** | Discovered `_give_back` abstraction |
 
-In 4 of 5 hard experiments, HDD produced substantially less code (25-40% reduction). More importantly, in 3 of 5 experiments (H3, H5, and H2), HDD produced **architecturally different** solutions — not just shorter code, but fundamentally different decompositions that emerged from the constraint-first fill order.
+Line counts exclude comments, docstrings, and blank lines.
+
+In 3 of 5 hard experiments, HDD produced substantially less code (30-37% reduction). In 2 of 5, HDD produced slightly *more* code due to explicit decomposition and `select`-based patterns. More importantly, in 3 of 5 experiments (H3, H5, and H2), HDD produced **architecturally different** solutions — different decompositions that emerged from the constraint-first fill order.
 
 ---
 
@@ -404,7 +406,7 @@ In 4 of 5 hard experiments, HDD produced substantially less code (25-40% reducti
 
 **24/24 PASS in Phase 2. Zero skill revisions needed.**
 
-Phase 3 confirmed these results scale to hard problems: in 4/5 experiments, HDD produced 25-40% less code, and in 3/5 experiments produced architecturally different (and simpler) solutions.
+Phase 3 confirmed these results scale to hard problems: in 3/5 experiments HDD produced 30-37% less code, and in 3/5 experiments produced architecturally different solutions.
 
 The three rules discovered during Phase 1 RED-GREEN-REFACTOR proved sufficient across all scenarios:
 
