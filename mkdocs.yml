@@ -30,6 +30,7 @@ theme:
 markdown_extensions:
   - tables
   - admonition
+  - attr_list
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.superfences
@@ -42,5 +43,9 @@ nav:
     - Core: skills/core.md
     - Compiler Loop: skills/compiler-loop.md
     - Iterative Reasoning: skills/iterative-reasoning.md
-  - Demo: demo.md
-  - Design: design.md
+  - Results:
+    - Skill vs Baseline: results.md
+    - Demo: demo.md
+  - Development:
+    - Process: process.md
+    - Design: design.md

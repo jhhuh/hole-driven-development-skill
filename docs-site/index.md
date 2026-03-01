@@ -1,14 +1,35 @@
 # Hole Driven Development — Claude Code Skills
 
+[:material-github: View on GitHub](https://github.com/jhhuh/hole-driven-development-skill){ .md-button }
+
 Three composable skills that teach Claude Code agents to implement code using **Hole Driven Development** (HDD), a top-down programming technique from Haskell.
 
-Instead of writing complete implementations in one pass, the agent:
+## Why Use This?
 
-1. Starts with the outermost structure
-2. Leaves **holes** for unknown sub-problems
-3. Lets the type checker (or its own reasoning) reveal what each hole needs
-4. Fills one hole at a time, most constrained first
-5. Repeats until no holes remain
+Without these skills, Claude Code writes complete implementations in one pass — all logic at once, no visible decomposition, no intermediate states for you to review. You see the final code, and by then it's too late to influence the approach.
+
+With HDD skills, the agent decomposes first, then fills one piece at a time. You watch the skeleton evolve in your editor and can intervene at any step.
+
+!!! success "Validated across 24 experiments in 5 languages with 24/24 PASS"
+
+| | Without skills | With HDD skills |
+|---|---|---|
+| **Decomposition** | Mental (invisible to you) | Written to the file as holes |
+| **Implementation** | All at once, single pass | One hole per iteration |
+| **Fill order** | Reading order or arbitrary | Most constrained first (fewer errors) |
+| **Code structure** | Monolithic functions | Modular helpers with clear contracts |
+| **Ambiguity** | Silently picks one interpretation | Stops and asks you to choose |
+| **Tool calls** | 5–7 per task | 14–43 per task (more checkpoints) |
+
+See [Skill vs Baseline](results.md) for full comparison data.
+
+## Add to Your Workflow
+
+Install the skills, then use them naturally in your Claude Code sessions:
+
+- **Haskell project?** The compiler loop skill kicks in when it sees `.hs` files with typed holes.
+- **Python / TypeScript / Go / Bash?** The iterative reasoning skill writes visible hole markers.
+- **Trivial one-liner?** The core skill's red-flag list prevents over-decomposition.
 
 ## Skills
 
@@ -18,17 +39,13 @@ Instead of writing complete implementations in one pass, the agent:
 | [`hole-driven-development`](skills/compiler-loop.md) | Compiler loop — compile, read diagnostics, fill, repeat | GHC / compiler |
 | [`hole-driven-development-iterative-reasoning`](skills/iterative-reasoning.md) | Claude reasons about each hole's contract, writes visible markers | Claude's reasoning + optional type checker |
 
-## Architecture
-
-Three-layer, composable:
+### Architecture
 
 ```
 hole-driven-development-core          ← philosophy (always loaded)
 ├── hole-driven-development           ← extends with compiler feedback loop
 └── hole-driven-development-iterative-reasoning  ← extends with reasoning loop
 ```
-
-The core skill defines the HDD discipline. Each extending skill adds a mechanism for determining what a hole needs — either a real compiler or Claude's own reasoning.
 
 ## Installation
 
@@ -41,8 +58,6 @@ cp -r skills/ your-project/.claude/skills/
 # Or user-wide
 cp -r skills/ ~/.claude/skills/
 ```
-
-Each skill has a YAML frontmatter with `name` and `description` that Claude Code uses for discovery.
 
 ## Quick Start
 
@@ -64,8 +79,6 @@ Load `hole-driven-development-iterative-reasoning`. Ask Claude to implement a fu
 > Implement `parse_csv(text: str) -> list[dict[str, str]]` — handle quoted fields.
 
 Claude writes visible hole markers, reasons about each contract, and fills one at a time.
-
-See the [Demo](demo.md) for detailed before/after comparisons.
 
 ## Supported Languages
 
