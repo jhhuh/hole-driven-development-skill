@@ -34,6 +34,8 @@ Drive implementation through the compiler's typed hole diagnostics. Write holes,
 
 **One hole per compile cycle.** Fill one, compile, read. Do not batch-fill.
 
+**Use named holes.** When introducing multiple holes, use `_name` (e.g., `_base`, `_recursive`) instead of bare `_`. This makes diagnostics easier to read and holes easier to track across compile cycles.
+
 **Diagnostics over memory.** Even if you "know" the answer, compile first and let the diagnostics confirm or correct you. The compiler may reveal constraints you missed.
 
 ## Compiler Invocation
