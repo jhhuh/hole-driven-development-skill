@@ -50,6 +50,8 @@ Each hole has: a number, a description of what it does, and what type/contract i
 
 **One hole per iteration.** Fill one, reassess, then pick the next.
 
+**Each distinct concern gets a hole.** When the spec has N distinct requirements or sub-problems, the skeleton should have at least N holes. Don't collapse multiple concerns into one hole — that defeats the purpose of decomposition.
+
 **Reason before filling.** For each hole, explicitly state: what it needs to produce, what it has available, and why your fill is correct. Do not skip this reasoning step.
 
 ## External Validation (Optional)
