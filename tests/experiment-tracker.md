@@ -36,10 +36,10 @@
 | B2 | Python: log processor + mypy | 4 | 1 | PASS | none | 5 holes (pipeline stages), 19 tool calls |
 | B3 | TypeScript: TodoList + tsc | 4 | 1 | PASS | none | 4 holes, 15 tool calls, exhaustive switch |
 | B4 | Go: FanOut concurrency | 4 | 1 | PASS | none | 4 holes, concurrency concerns decomposed |
-| B5 | Python: crawl_links (no type checker) | 5 | 1 | | | |
-| B6 | Bash: backup_rotate | 5 | 1 | | | |
-| B7 | Python: multi-file REST API | 5 | 1 | | | |
-| B8 | Ambiguous spec (smart_merge) | 5 | 1 | | | |
+| B5 | Python: crawl_links (no type checker) | 5 | 1 | PASS | none | 5 holes, BFS with robots.txt, stdlib only |
+| B6 | Bash: backup_rotate | 5 | 1 | PASS | none | 5 holes, echo+exit markers, 30 tool calls |
+| B7 | Python: multi-file REST API | 5 | 1 | PASS | none | 15 holes across 4 files, dependency-ordered |
+| B8 | Ambiguous spec (smart_merge) | 5 | 1 | PASS | none | Stopped, identified 4 strategies |
 
 ## Suite D: Integration & Edge Cases
 
