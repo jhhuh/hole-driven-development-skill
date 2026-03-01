@@ -35,6 +35,8 @@ Implement top-down by decomposition. Start with the outermost structure, leave *
 
 **When ambiguous** — multiple equally valid fills — STOP and ask the human.
 
+**When NOT to decompose further.** Some algorithms are inherently monolithic — dual-cursor walks, coroutine-style loops, complex state machines with tightly coupled transitions. If the state cannot be cleanly partitioned across hole boundaries, keep it as a single hole with internal comments for structure rather than splitting into sub-holes that introduce bugs at the seams.
+
 ## Success Criterion
 
 No holes remain, the code satisfies the original intention, and no cross-hole interaction bugs remain.

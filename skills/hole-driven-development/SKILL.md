@@ -49,6 +49,8 @@ Named holes make diagnostics easier to read and holes easier to track across com
 
 **Diagnostics over memory.** Even if you "know" the answer, compile first and let the diagnostics confirm or correct you. The compiler may reveal constraints you missed.
 
+**When NOT to decompose further.** Some algorithms are inherently monolithic — dual-cursor walks, complex FSMs, coroutine-style loops. If the state machine's transitions are tightly coupled, keep it as one hole with internal structure via comments. The compiler catches type errors at hole boundaries but not logic bugs from split state.
+
 ## Compiler Invocation
 
 Auto-detect from project structure:

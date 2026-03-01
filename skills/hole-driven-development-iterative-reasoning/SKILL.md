@@ -61,6 +61,8 @@ Each hole has: a number, a description of what it does, and what type/contract i
 
 **Verify after filling.** Cross-cutting concerns (concurrency, resource lifecycle, error handling) don't decompose into independent holes. After each fill, check interactions with previously filled code.
 
+**When NOT to decompose further.** Algorithms with tightly coupled state machines (dual-cursor walks, FSMs with shared transition state) should stay as a single hole. Use internal comments to mark structure within the hole, but do not split the state machine across sub-holes — the transitions are too interdependent for per-hole reasoning to catch interaction bugs.
+
 ## External Validation (Optional)
 
 When a type checker is available, run it after filling to catch errors:
