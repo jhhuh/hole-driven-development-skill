@@ -10,6 +10,28 @@ Three skills for developing, validating, and improving Claude Code skills throug
 | `experiment-set-design` | Design task sets with baselines and phase progression |
 | `iterative-skill-refinement` | The improvement loop with anti-overfitting discipline |
 
+## How They Compose
+
+```
+experiment-set-design       — what to test, how to progress phases
+├── blind-skill-assessment  — how to fairly judge results
+└── iterative-skill-refinement — the improvement loop (uses both above)
+```
+
+Each skill is independently useful. The refinement skill references the other two.
+
+## Test Results
+
+All three skills were developed using TDD for skills (RED-GREEN-REFACTOR):
+
+| Skill | Baseline Gaps Found | GREEN Test |
+|-------|-------------------|------------|
+| blind-skill-assessment | No randomization, single perspective, holistic verdicts, no rubric, no confidence | 5/5 process steps followed |
+| experiment-set-design | No baseline principle, no anti-overfitting, no phase progression, no assessment variation | All 6 gaps addressed |
+| iterative-skill-refinement | No structured loop, no re-experimentation, no overfitting warning, no convergence | Full 7-step loop followed |
+
+Integration test: all three skills compose correctly on a novel scenario (defensive-error-handling skill improvement).
+
 ## Installation
 
 ```bash
