@@ -35,12 +35,27 @@ Each hole has: a number, a description, and what type/contract it fulfills.
    - What constraints apply?
 5. FILL exactly one hole — introduce sub-holes if complex
 6. VALIDATE (optional): run type checker if available
-7. Repeat from 3 until no holes remain
+7. VERIFY cross-hole interactions: for each filled hole sharing state with this fill:
+   - Shared mutable state: is access properly synchronized?
+   - Resource lifecycle: are acquire/release scopes correct across hole boundaries?
+   - Error/cancellation paths: do they propagate correctly to other holes?
+   Fix any issue before continuing.
+8. Repeat from 3 until no holes remain
+9. REVIEW-ALL: before declaring done, re-read the complete implementation:
+   - State transitions that span multiple fills
+   - Resource acquired in one fill, released in another
+   - Error paths that cross fill boundaries
+   - Loop invariants depending on multiple fills
+   Fix any systemic bug the per-hole VERIFY could not catch.
 ```
 
 **Each distinct concern gets a hole.** N requirements → at least N holes.
 
 **Reason before filling.** State: what it produces, what's available, why the fill is correct.
+
+**Verify after filling.** Cross-cutting concerns (concurrency, resource lifecycle, error handling) don't decompose into independent holes. After each fill, check interactions with previously filled code.
+
+**When NOT to decompose further.** Algorithms with tightly coupled state machines (dual-cursor walks, FSMs with shared transition state) should stay as a single hole. Use internal comments to mark structure, but don't split the state machine across sub-holes.
 
 ## External Validation (Optional)
 

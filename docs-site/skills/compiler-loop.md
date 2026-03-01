@@ -18,15 +18,29 @@ Drive implementation through the compiler's typed hole diagnostics. Write holes,
 3. READ diagnostics: expected type, bindings in scope, valid hole fits
 4. PICK the most constrained hole (fewest valid fits)
 5. FILL exactly one hole — guided by diagnostics, not memory
-6. COMPILE again — go to 3
-7. EXIT when compilation succeeds (no holes remain)
+6. VERIFY semantic correctness against previously filled holes:
+   - Does shared state flow correctly between this fill and prior fills?
+   - Are resource scopes (locks, handles, channels) consistent?
+   - Do error paths compose correctly?
+   The compiler catches type errors but not logic bugs.
+7. COMPILE again — go to 3
+8. When compilation succeeds (no holes remain):
+   REVIEW-ALL — re-read the complete implementation holistically:
+   - State transitions that span multiple fills
+   - Resource acquired in one fill, released in another
+   - Error paths that cross fill boundaries
+   - Loop invariants depending on multiple fills
+   Fix any systemic bug the per-hole VERIFY could not catch.
+9. EXIT
 ```
 
 **One hole per compile cycle.** Fill one, compile, read. Do not batch-fill.
 
-**Use named holes.** `_name` (e.g., `_base`, `_recursive`) instead of bare `_`. Easier to track across cycles.
+**Use named holes.** In Haskell: `_name` (e.g., `_base`, `_recursive`) instead of bare `_`. In Lean 4: `sorry` with preceding comment or `let _base := sorry`. In Rust: `todo!("hole_name")`. Easier to track across cycles.
 
 **Diagnostics over memory.** Even if you "know" the answer, compile first.
+
+**When NOT to decompose further.** Some algorithms are inherently monolithic — dual-cursor walks, complex FSMs, coroutine-style loops. If the state machine's transitions are tightly coupled, keep it as one hole with internal structure via comments. The compiler catches type errors at hole boundaries but not logic bugs from split state.
 
 ## Compiler Invocation
 
