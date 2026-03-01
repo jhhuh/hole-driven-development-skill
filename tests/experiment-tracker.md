@@ -50,6 +50,15 @@
 | D3 | Getting stuck — compiler (type families) | 6 | 1 | PASS | none | Solved in 2 cycles, GHC resolved type family |
 | D4 | Getting stuck — reasoning (CSP solver) | 6 | 1 | PASS | none | 6 holes, AC-3 + MAC backtracking, completed |
 
+## Convergence Status
+
+**CONVERGED** — 24/24 PASS on first run, zero skill revisions.
+
+Phase 1 RED-GREEN-REFACTOR identified three critical rules that proved sufficient across all 24 experiments:
+1. **"Holes must be visible"** — prevents mental-only decomposition
+2. **"Use named holes"** — improves trackability in compiler feedback
+3. **"Each distinct concern gets a hole"** — prevents under-decomposition
+
 ## Skill Revision Log
 
 | Date | Skill | What changed | Triggered by |
