@@ -34,7 +34,14 @@ Drive implementation through the compiler's typed hole diagnostics. Write holes,
    - Do error paths compose correctly?
    The compiler catches type errors but not logic bugs.
 7. COMPILE again — go to 3
-8. EXIT when compilation succeeds (no holes remain)
+8. When compilation succeeds (no holes remain):
+   REVIEW-ALL — re-read the complete implementation holistically:
+   - State transitions that span multiple fills
+   - Resource acquired in one fill, released in another
+   - Error paths that cross fill boundaries
+   - Loop invariants depending on multiple fills
+   Fix any systemic bug the per-hole VERIFY could not catch.
+9. EXIT
 ```
 
 **One hole per compile cycle.** Fill one, compile, read. Do not batch-fill.
@@ -67,7 +74,7 @@ When using `nix develop`, prefix commands: `nix develop -c <compiler> ...`
 
 Run the loop autonomously. **Stop only when:**
 
-- **Done:** Compilation succeeds — no holes remain.
+- **Done:** Compilation succeeds, no holes remain, and REVIEW-ALL found no systemic bugs.
 - **Ambiguous:** Multiple equally valid hole fits and no constraint distinguishes them. Surface the options to the human.
 - **Stuck:** 5+ compile cycles on the same hole without progress. Ask for help.
 

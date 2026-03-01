@@ -25,6 +25,12 @@ Implement top-down by decomposition. Start with the outermost structure, leave *
    - Error/cancel paths: do they clean up resources from other holes?
    If any check fails, fix before proceeding.
 7. Repeat from 3 until no holes remain
+8. REVIEW-ALL: before declaring done, re-read the complete implementation:
+   - State transitions that span multiple fills
+   - Resource acquired in one fill, released in another
+   - Error paths that cross fill boundaries
+   - Loop invariants depending on multiple fills
+   Fix any systemic bug the per-hole VERIFY could not catch.
 ```
 
 **Holes must be visible.** Write holes to the file, not just in your reasoning. Each iteration of the loop edits the file — the human should see the skeleton evolve in their editor.
@@ -39,7 +45,7 @@ Implement top-down by decomposition. Start with the outermost structure, leave *
 
 ## Success Criterion
 
-No holes remain, the code satisfies the original intention, and no cross-hole interaction bugs remain.
+No holes remain, the code satisfies the original intention, the REVIEW-ALL pass found no systemic bugs, and no cross-hole interaction bugs remain.
 
 ## What This Skill Does NOT Cover
 

@@ -51,6 +51,12 @@ Each hole has: a number, a description of what it does, and what type/contract i
    - Error/cancellation paths: do they propagate correctly to other holes?
    Fix any issue before continuing.
 8. Repeat from 3 until no holes remain
+9. REVIEW-ALL: before declaring done, re-read the complete implementation:
+   - State transitions that span multiple fills
+   - Resource acquired in one fill, released in another
+   - Error paths that cross fill boundaries
+   - Loop invariants depending on multiple fills
+   Fix any systemic bug the per-hole VERIFY could not catch.
 ```
 
 **One hole per iteration.** Fill one, reassess, then pick the next.
@@ -79,7 +85,7 @@ If no type checker is available, your reasoning is the sole oracle. Be more care
 
 Run the loop autonomously. **Stop only when:**
 
-- **Done:** No holes remain and code satisfies the intention.
+- **Done:** No holes remain, code satisfies the intention, and REVIEW-ALL found no systemic bugs.
 - **Ambiguous:** A hole's contract is unclear — multiple valid approaches with different semantics. Surface options to the human.
 - **Stuck:** 5+ iterations on the same hole without progress. Ask for help.
 
