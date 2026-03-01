@@ -395,17 +395,100 @@ git commit -m "Complete initial skill suite: core, compiler-loop, iterative-reas
 
 ---
 
-## Phase 2: Experimentation and Improvement
+## Phase 2: Iterative Experimentation and Optimization
 
-Phase 1 produces working skills. Phase 2 proves they work across diverse real-world scenarios, reveals weaknesses, and drives iterative improvement. Each experiment produces evidence (saved transcripts) and may trigger skill revisions.
+Phase 1 produces working skills. Phase 2 proves they work, and **iteratively improves them** until they're robust. This phase is a loop, not a checklist.
 
-**Process per experiment:**
-1. Write scenario in `tests/<skill>/experiment-N-<name>.md`
-2. Run with subagent, save transcript to `tests/<skill>/results/experiment-N-<name>.md`
-3. Grade: PASS (correct HDD behavior), PARTIAL (some HDD, some shortcuts), FAIL (no HDD)
-4. If PARTIAL or FAIL → analyze root cause → revise skill → re-run → commit
+### The Optimization Loop
 
-**Tracking:** Maintain `tests/experiment-tracker.md` with a table of all experiments, grades, and which skill revision they drove.
+```
+┌─────────────────────────────────────────────────────────┐
+│  1. SELECT batch of experiments (start with Suite A+C)  │
+│  2. RUN each experiment with subagent                   │
+│  3. GRADE: PASS / PARTIAL / FAIL                        │
+│  4. ANALYZE failures — group by root cause              │
+│  5. REVISE skill(s) to address root causes              │
+│  6. RE-RUN failed experiments to verify fix             │
+│  7. If new failure modes discovered → DESIGN new        │
+│     experiments, add to tracker                         │
+│  8. LOOP until current batch is all PASS                │
+│  9. SELECT next batch → go to 2                         │
+│                                                         │
+│  EXIT when: all experiments PASS across 2 consecutive   │
+│  full runs with no skill changes between them           │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Batch Strategy
+
+Run experiments in progressive batches, not all 24 at once. Each batch targets one skill layer so revisions are focused:
+
+| Round | Batch | Skills under test | Why this order |
+|-------|-------|-------------------|----------------|
+| 1 | C1–C4 (Core stress) | core | Validate foundation first |
+| 2 | A1–A4 (Compiler easy) | core + compiler | Simple Haskell, verify basics |
+| 3 | A5–A8 (Compiler hard) | core + compiler | Push compiler loop to limits |
+| 4 | B1–B4 (Reasoning typed) | core + reasoning | Languages with type checkers |
+| 5 | B5–B8 (Reasoning untyped) | core + reasoning | No type checker, edge cases |
+| 6 | D1–D4 (Integration) | all | Layered architecture, stuck conditions |
+
+Each round loops internally (run → grade → revise → re-run) until all experiments in the batch PASS.
+
+### Evidence Format
+
+Each experiment produces:
+
+```
+tests/<skill>/results/experiment-<id>-<name>/
+├── run-1.md          # First attempt transcript
+├── run-2.md          # After skill revision (if needed)
+├── ...
+└── assessment.md     # Final grade + root cause analysis
+```
+
+`assessment.md` format:
+```markdown
+# Experiment <id>: <name>
+
+## Grade: PASS | PARTIAL | FAIL
+
+## Behavior observed
+[What the agent actually did — verbatim quotes of key moments]
+
+## Root cause (if PARTIAL/FAIL)
+[Why the skill failed to guide correct behavior]
+
+## Skill revision triggered
+[What was changed in SKILL.md, or "none"]
+
+## Rationalizations observed
+[Any excuses the agent made for skipping HDD — add to rationalization table]
+```
+
+### Convergence Criteria
+
+The loop exits when:
+1. All 24+ experiments grade PASS
+2. A full re-run of all experiments (no cherry-picking) confirms PASS
+3. No skill changes were needed between the two full runs
+
+If convergence stalls (same experiment fails 3+ rounds), escalate:
+- Re-examine the skill architecture (is the three-layer split right?)
+- Consider if the experiment's success criteria are realistic
+- Discuss with user before continuing
+
+### Tracking
+
+Maintain `tests/experiment-tracker.md`:
+
+```markdown
+| # | Batch | Name | Round | Run | Grade | Revision | Notes |
+|---|-------|------|-------|-----|-------|----------|-------|
+| C1 | 1 | Trivial one-liner | 1 | 1 | | | |
+| C1 | 1 | Trivial one-liner | 1 | 2 | | | After revision |
+```
+
+The `Round` and `Run` columns track iteration history. A single experiment may have multiple rows as the skill is revised.
 
 ---
 
@@ -865,7 +948,7 @@ def solve_constraint_satisfaction(
 
 ---
 
-### Phase 2 Summary
+### Experiment Catalog Summary
 
 | Suite | # Experiments | Tests What |
 |-------|--------------|-----------|
@@ -875,71 +958,118 @@ def solve_constraint_satisfaction(
 | D: Integration & Edge Cases | 4 | Skill layering, stuck conditions |
 | **Total** | **24** | |
 
-**After all experiments:**
-- Update `tests/experiment-tracker.md` with full results
-- Revise all three skills based on findings
-- Update `artifacts/devlog.md` with learnings
-- Final commit with improved skills
+New experiments may be added during iteration as new failure modes are discovered.
 
 ---
 
-### Task 36: Write experiment tracker and commit all experiments
+### Task 12: Set up experiment infrastructure
 
 **Files:**
-- Create: `tests/experiment-tracker.md`
+- Create: `tests/experiment-tracker.md` (empty tracker table)
+- Create: `tests/run-experiment.md` (instructions for running an experiment with a subagent)
 
-```markdown
-# Experiment Tracker
+**Step 1: Create tracker**
 
-| # | Suite | Name | Skill | Grade | Revision? | Notes |
-|---|-------|------|-------|-------|-----------|-------|
-| A1 | Compiler | Trivial polymorphic | compiler-loop | | | |
-| A2 | Compiler | Typeclass-constrained | compiler-loop | | | |
-| A3 | Compiler | Multiple holes | compiler-loop | | | |
-| A4 | Compiler | ADT pattern matching | compiler-loop | | | |
-| A5 | Compiler | State monad | compiler-loop | | | |
-| A6 | Compiler | Parser combinator | compiler-loop | | | |
-| A7 | Compiler | Ambiguous hole | compiler-loop | | | |
-| A8 | Compiler | Deep hole nesting | compiler-loop | | | |
-| B1 | Reasoning | Python simple | iterative-reasoning | | | |
-| B2 | Reasoning | Python pipeline + mypy | iterative-reasoning | | | |
-| B3 | Reasoning | TypeScript React + tsc | iterative-reasoning | | | |
-| B4 | Reasoning | Go concurrent | iterative-reasoning | | | |
-| B5 | Reasoning | Python no type checker | iterative-reasoning | | | |
-| B6 | Reasoning | Bash untyped | iterative-reasoning | | | |
-| B7 | Reasoning | Multi-file | iterative-reasoning | | | |
-| B8 | Reasoning | Ambiguous spec | iterative-reasoning | | | |
-| C1 | Core | Trivial one-liner | core | | | |
-| C2 | Core | Already decomposed | core | | | |
-| C3 | Core | Time pressure | core | | | |
-| C4 | Core | Competing instruction | core | | | |
-| D1 | Integration | Core + compiler | core + compiler | | | |
-| D2 | Integration | Core + reasoning | core + reasoning | | | |
-| D3 | Edge | Stuck (compiler) | compiler-loop | | | |
-| D4 | Edge | Stuck (reasoning) | iterative-reasoning | | | |
-```
+Initialize with all 24 experiments, empty grade columns.
 
-**Commit:**
+**Step 2: Create run instructions**
+
+Document the exact process for running a single experiment:
+1. Launch subagent with scenario prompt + skill(s) loaded
+2. Save full transcript
+3. Write assessment.md
+4. Grade and note rationalizations
+
+**Step 3: Commit**
+
 ```bash
 git add tests/
-git commit -m "Add experiment tracker and all 24 experiment scenarios"
+git commit -m "Add experiment infrastructure and tracker"
 ```
 
 ---
 
-### Task 37: Final skill revision and release
+### Task 13: Round 1 — Core stress tests (C1–C4)
 
-After all experiments are graded:
+**Run experiments C1–C4 with core skill loaded.**
 
-**Step 1:** Identify patterns across PARTIAL/FAIL experiments. Group by root cause.
+For each experiment:
+1. Run with subagent, save transcript
+2. Grade: PASS / PARTIAL / FAIL
+3. If PARTIAL/FAIL: analyze root cause, revise core skill, re-run
 
-**Step 2:** Revise each skill to address systematic failures. Keep a changelog in `artifacts/devlog.md`.
+**Loop until C1–C4 all PASS.**
 
-**Step 3:** Re-run any previously-failed experiments to confirm fixes.
+Commit after each skill revision:
+```bash
+git commit -m "Round 1: revise core skill — [describe what changed]"
+```
 
-**Step 4:** Final commit.
+---
+
+### Task 14: Round 2 — Compiler loop basics (A1–A4)
+
+**Run experiments A1–A4 with core + compiler-loop skills loaded.**
+
+Same inner loop: run → grade → revise → re-run until all PASS.
+
+Note: core skill revisions from Round 1 may affect behavior here. If a core revision causes regressions, the fix goes in the core skill (not the compiler-loop skill).
+
+---
+
+### Task 15: Round 3 — Compiler loop advanced (A5–A8)
+
+**Run experiments A5–A8 with core + compiler-loop skills loaded.**
+
+These are harder: monadic code, parsers, ambiguity, deep nesting. Expect more PARTIAL/FAIL results and more skill revisions.
+
+---
+
+### Task 16: Round 4 — Iterative reasoning with type checkers (B1–B4)
+
+**Run experiments B1–B4 with core + iterative-reasoning skills loaded.**
+
+First time testing the reasoning skill. Likely to reveal gaps in hole marker format, external tooling integration, and reasoning quality.
+
+---
+
+### Task 17: Round 5 — Iterative reasoning without type checkers (B5–B8)
+
+**Run experiments B5–B8 with core + iterative-reasoning skills loaded.**
+
+Maximum stress: no external validation. Tests whether the skill degrades gracefully when Claude's reasoning is the sole oracle.
+
+---
+
+### Task 18: Round 6 — Integration and edge cases (D1–D4)
+
+**Run experiments D1–D4 with all skills loaded as specified per experiment.**
+
+Tests layered architecture and stuck conditions. By this point, individual skills should be solid — this round tests their interaction.
+
+---
+
+### Task 19: Full regression run
+
+**Re-run ALL 24 experiments with final skill versions.**
+
+No cherry-picking. Every experiment must PASS. If any fail, loop back to the appropriate round.
+
+**Convergence check:** If this full run passes AND no skill changes were needed since the previous batch, the skills are stable.
+
+---
+
+### Task 20: Final commit and devlog
+
+**Step 1:** Update `artifacts/devlog.md` with full Phase 2 history:
+- How many rounds per batch
+- What revisions were made and why
+- What new experiments were discovered
+- Final convergence state
+
+**Step 2:** Final commit
 
 ```bash
 git add -A
-git commit -m "Finalize skills after 24-experiment validation"
+git commit -m "Complete Phase 2: skills validated across 24+ experiments"
 ```
