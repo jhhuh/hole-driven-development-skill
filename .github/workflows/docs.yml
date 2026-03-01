@@ -25,6 +25,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install mkdocs-material
+      - name: Substitute commit SHA into permalink placeholders
+        run: sed -i "s/@COMMIT_SHA@/$GITHUB_SHA/g" docs-site/*.md
       - run: mkdocs build
       - uses: actions/upload-pages-artifact@v3
         with:

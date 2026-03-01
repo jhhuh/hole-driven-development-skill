@@ -34,9 +34,13 @@ This was observed across all three baseline tests (Python TOC generator, Haskell
 
     Agent wrote everything in a single function body — parse, slugify, deduplicate, format — all at once. No decomposition visible in the file. 5 tool calls.
 
+    [:material-file-code: baseline-toc.py](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-core/results/baseline-toc.py)
+
 === "With HDD"
 
     Agent created 4 holes (`_extract_headings`, `_make_slug`, `_deduplicate_slug`, `_format_entry`), each starting as `raise NotImplementedError(...)`. Filled most constrained first (`_format_entry` → `_deduplicate_slug` → `_extract_headings` → `_make_slug`). 19 tool calls.
+
+    [:material-file-code: green-toc.py](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-core/results/green-toc.py) · [:material-file-document: assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-core/results/green-assessment.md)
 
 ### Python CSV Parser (Iterative Reasoning)
 
@@ -44,9 +48,13 @@ This was observed across all three baseline tests (Python TOC generator, Haskell
 
     Agent identified sub-problems (row splitting, quote-aware parsing, header mapping) in its reasoning, but wrote all 17 lines at once. The human never sees intermediate states. 7 tool calls.
 
+    [:material-file-code: baseline-csv.py](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/baseline-csv.py)
+
 === "With HDD"
 
     Agent wrote skeleton with `NotImplementedError` hole markers. Filled HOLE_1 (parse_row) first because HOLE_2 depends on it. Explicit contract reasoning before each fill. 14 tool calls.
+
+    [:material-file-code: green-csv.py](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/green-csv.py) · [:material-file-document: assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/green-assessment.md)
 
 ### Haskell myFoldr (Compiler Loop)
 
@@ -54,40 +62,44 @@ This was observed across all three baseline tests (Python TOC generator, Haskell
 
     When instructed to use HDD, agent used the compiler loop but batch-filled two holes in one cycle.
 
+    [:material-file-code: baseline-Lib.hs](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/baseline-Lib.hs)
+
 === "With HDD"
 
     Strict one-hole-per-cycle discipline. Named holes (`_empty`, `_cons`, `_rest`). 5 compile cycles. Caught misleading GHC suggestion (`z` for the recursive case) by cross-referencing with function purpose.
+
+    [:material-file-code: green-Lib.hs](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/green-Lib.hs) · [:material-file-document: assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/green-assessment.md)
 
 ## Phase 2: Full Experiment Results
 
 ### All 24 Experiments
 
-| # | Name | Skill | Lang | Holes | Cycles/Calls | Result |
-|---|------|-------|------|-------|-------------|--------|
-| C1 | Trivial one-liner | Core | — | 0 (skipped) | — | PASS — correctly skipped HDD |
-| C2 | Already-decomposed | Core | — | 0 (skipped) | — | PASS — no artificial holes |
-| C3 | Time pressure | Core | Py | 3 | 14 calls | PASS — resisted urgency |
-| C4 | Competing instruction | Core | Py | 4 | 8 calls | PASS — overrode "just write it" |
-| A1 | myMap | Compiler | Hs | 4 | 5 cycles | PASS |
-| A2 | mySort | Compiler | Hs | 8 | 9 cycles | PASS — Ord from diagnostics |
-| A3 | foldMap | Compiler | Hs | 3 | 3 cycles | PASS — mempty most constrained |
-| A4 | Expr eval | Compiler | Hs | 6 | 6 cycles | PASS |
-| A5 | State monad RPN | Compiler | Hs | 11 | 12 cycles | PASS — MonadFail caught |
-| A6 | Parser combinator | Compiler | Hs | 6 | 7 cycles | PASS — mutual recursion |
-| A7 | Ambiguous mystery | Compiler | Hs | — | 1 cycle | PASS — stopped, 5+ options |
-| A8 | Type checker | Compiler | Hs | 9 | 10 cycles | PASS — sub-holes |
-| B1 | group_by | Reasoning | Py | 2 | 8 calls | PASS |
-| B2 | Log processor | Reasoning | Py | 5 | 19 calls | PASS — pipeline stages |
-| B3 | TodoList | Reasoning | TS | 4 | 15 calls | PASS — exhaustive switch |
-| B4 | FanOut | Reasoning | Go | 4 | — | PASS — concurrency decomposed |
-| B5 | Web crawler | Reasoning | Py | 5 | 21 calls | PASS — no type checker |
-| B6 | Backup rotation | Reasoning | Bash | 5 | 28 calls | PASS — echo+exit markers |
-| B7 | REST API | Reasoning | Py | 15 | 43 calls | PASS — 4 files |
-| B8 | Ambiguous merge | Reasoning | Py | — | 3 calls | PASS — stopped, 4 strategies |
-| D1 | Core + compiler | Both | Hs | 4 | 5 cycles | PASS — skills complementary |
-| D2 | Core + reasoning | Both | Go | 4 | — | PASS — constraint-ordered |
-| D3 | Stuck (type family) | Compiler | Hs | 1 | 2 cycles | PASS — solved easily |
-| D4 | Stuck (CSP solver) | Reasoning | Py | 6 | 17 calls | PASS — AC-3 + backtracking |
+| # | Name | Skill | Lang | Holes | Cycles/Calls | Result | Source |
+|---|------|-------|------|-------|-------------|--------|--------|
+| C1 | Trivial one-liner | Core | — | 0 (skipped) | — | PASS — correctly skipped HDD | [code](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-core/results/c1-double.py) |
+| C2 | Already-decomposed | Core | — | 0 (skipped) | — | PASS — no artificial holes | [code](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-core/results/c2-process-order.py) |
+| C3 | Time pressure | Core | Py | 3 | 14 calls | PASS — resisted urgency | [code](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-core/results/c3-log-processor.py) |
+| C4 | Competing instruction | Core | Py | 4 | 8 calls | PASS — overrode "just write it" | [code](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-core/results/c4-eval.py) |
+| A1 | myMap | Compiler | Hs | 4 | 5 cycles | PASS | [code](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/a1-mymap/MyMap.hs) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/a1-mymap/assessment.md) |
+| A2 | mySort | Compiler | Hs | 8 | 9 cycles | PASS — Ord from diagnostics | [code](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/a2-mysort/MySort.hs) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/a2-mysort/assessment.md) |
+| A3 | foldMap | Compiler | Hs | 3 | 3 cycles | PASS — mempty most constrained | [code](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/a3-foldmap/FoldMap.hs) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/a3-foldmap/assessment.md) |
+| A4 | Expr eval | Compiler | Hs | 6 | 6 cycles | PASS | [code](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/a4-eval/Eval.hs) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/a4-eval/assessment.md) |
+| A5 | State monad RPN | Compiler | Hs | 11 | 12 cycles | PASS — MonadFail caught | [code](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/a5-state/Stack.hs) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/a5-state/assessment.md) |
+| A6 | Parser combinator | Compiler | Hs | 6 | 7 cycles | PASS — mutual recursion | [code](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/a6-parser/Parser.hs) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/a6-parser/assessment.md) |
+| A7 | Ambiguous mystery | Compiler | Hs | — | 1 cycle | PASS — stopped, 5+ options | [code](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/a7-ambiguous/Mystery.hs) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/a7-ambiguous/assessment.md) |
+| A8 | Type checker | Compiler | Hs | 9 | 10 cycles | PASS — sub-holes | [code](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/a8-typecheck/TypeCheck.hs) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/a8-typecheck/assessment.md) |
+| B1 | group_by | Reasoning | Py | 2 | 8 calls | PASS | [code](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/b1-groupby/group_by.py) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/b1-groupby/assessment.md) |
+| B2 | Log processor | Reasoning | Py | 5 | 19 calls | PASS — pipeline stages | [code](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/b2-logprocessor/process_log.py) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/b2-logprocessor/assessment.md) |
+| B3 | TodoList | Reasoning | TS | 4 | 15 calls | PASS — exhaustive switch | [code](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/b3-todolist/TodoList.ts) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/b3-todolist/assessment.md) |
+| B4 | FanOut | Reasoning | Go | 4 | — | PASS — concurrency decomposed | [code](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/b4-fanout/fanout.go) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/b4-fanout/assessment.md) |
+| B5 | Web crawler | Reasoning | Py | 5 | 21 calls | PASS — no type checker | [code](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/b5-crawler/crawl_links.py) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/b5-crawler/assessment.md) |
+| B6 | Backup rotation | Reasoning | Bash | 5 | 28 calls | PASS — echo+exit markers | [code](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/b6-backup/backup_rotate.sh) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/b6-backup/assessment.md) |
+| B7 | REST API | Reasoning | Py | 15 | 43 calls | PASS — 4 files | [code](https://github.com/jhhuh/hole-driven-development-skill/tree/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/b7-restapi) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/b7-restapi/assessment.md) |
+| B8 | Ambiguous merge | Reasoning | Py | — | 3 calls | PASS — stopped, 4 strategies | [code](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/b8-smartmerge/smart_merge.py) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/b8-smartmerge/assessment.md) |
+| D1 | Core + compiler | Both | Hs | 4 | 5 cycles | PASS — skills complementary | [code](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/integration/results/d1-state-integrated/Stack.hs) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/integration/results/d1-state-integrated/assessment.md) |
+| D2 | Core + reasoning | Both | Go | 4 | — | PASS — constraint-ordered | [code](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/integration/results/d2-fanout-integrated/fanout.go) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/integration/results/d2-fanout-integrated/assessment.md) |
+| D3 | Stuck (type family) | Compiler | Hs | 1 | 2 cycles | PASS — solved easily | [code](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/integration/results/d3-stuck-compiler/TypeFamily.hs) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/integration/results/d3-stuck-compiler/assessment.md) |
+| D4 | Stuck (CSP solver) | Reasoning | Py | 6 | 17 calls | PASS — AC-3 + backtracking | [code](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/integration/results/d4-stuck-reasoning/csp_solver.py) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/integration/results/d4-stuck-reasoning/assessment.md) |
 
 ### Convergence
 
