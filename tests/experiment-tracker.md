@@ -45,10 +45,10 @@
 
 | # | Name | Round | Run | Grade | Revision | Notes |
 |---|------|-------|-----|-------|----------|-------|
-| D1 | Core + compiler loop (State monad) | 6 | 1 | | | |
-| D2 | Core + reasoning (Go FanOut) | 6 | 1 | | | |
-| D3 | Getting stuck — compiler (type families) | 6 | 1 | | | |
-| D4 | Getting stuck — reasoning (CSP solver) | 6 | 1 | | | |
+| D1 | Core + compiler loop (State monad) | 6 | 1 | PASS | none | 5 cycles, skills complementary, no conflicts |
+| D2 | Core + reasoning (Go FanOut) | 6 | 1 | PASS | none | 4 holes, constraint-ordered filling |
+| D3 | Getting stuck — compiler (type families) | 6 | 1 | PASS | none | Solved in 2 cycles, GHC resolved type family |
+| D4 | Getting stuck — reasoning (CSP solver) | 6 | 1 | PASS | none | 6 holes, AC-3 + MAC backtracking, completed |
 
 ## Skill Revision Log
 
