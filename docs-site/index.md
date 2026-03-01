@@ -27,7 +27,7 @@ See [Skill vs Baseline](results.md) for full comparison data.
 
 Install the skills, then use them naturally in your Claude Code sessions:
 
-- **Haskell project?** The compiler loop skill kicks in when it sees `.hs` files with typed holes.
+- **Haskell / Lean 4 / Rust project?** The compiler loop skill kicks in when it sees typed holes (`.hs`, `.lean`, or `.rs` files).
 - **Python / TypeScript / Go / Bash?** The iterative reasoning skill writes visible hole markers.
 - **Trivial one-liner?** The core skill's red-flag list prevents over-decomposition.
 
@@ -43,8 +43,8 @@ Install the skills, then use them naturally in your Claude Code sessions:
 
 ```
 hole-driven-development-core          ← philosophy (always loaded)
-├── hole-driven-development           ← extends with compiler feedback loop
-└── hole-driven-development-iterative-reasoning  ← extends with reasoning loop
+├── hole-driven-development           ← compiler feedback loop (Haskell, Lean 4, Rust)
+└── hole-driven-development-iterative-reasoning  ← reasoning loop (any language)
 ```
 
 ## Installation
@@ -72,6 +72,24 @@ myFoldr = _
 
 Claude autonomously compiles, reads diagnostics, and fills holes one at a time until compilation succeeds.
 
+### Compiler Loop (Lean 4)
+
+```lean
+def myAppend (xs ys : List α) : List α := sorry
+```
+
+Claude builds with `lake`, reads "unsolved goals" diagnostics, and fills `sorry` placeholders iteratively.
+
+### Compiler Loop (Rust)
+
+```rust
+fn my_map<T, U>(xs: Vec<T>, f: impl Fn(T) -> U) -> Vec<U> {
+    todo!("map")
+}
+```
+
+Claude builds with `cargo`, uses intentional type mismatches to extract constraints, and fills `todo!()` placeholders iteratively.
+
 ### Iterative Reasoning (any language)
 
 Load `hole-driven-development-iterative-reasoning`. Ask Claude to implement a function:
@@ -84,9 +102,9 @@ Claude writes visible hole markers, reasons about each contract, and fills one a
 
 **Compiler loop** (real typed holes):
 
-- Haskell (GHC) — implemented
-- Lean 4 — planned
-- Rust — planned
+- Haskell (GHC)
+- Lean 4 (`lake` / `lean`)
+- Rust (`cargo` / `rustc`)
 
 **Iterative reasoning** (hole markers):
 

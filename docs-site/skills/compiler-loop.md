@@ -33,8 +33,12 @@ Drive implementation through the compiler's typed hole diagnostics. Write holes,
 | Language | Hole syntax | Compile command | Detection |
 |----------|------------|-----------------|-----------|
 | Haskell | `_`, `_name` | `cabal build` if `.cabal`; otherwise `ghc <file> -fno-code` | `.cabal`, `.hs` |
+| Lean 4 | `sorry`, `_` | `lake build` if `lakefile.lean`/`lakefile.toml`; otherwise `lean <file>` | `lakefile.lean`, `.lean` |
+| Rust | `todo!()` | `cargo build` if `Cargo.toml`; otherwise `rustc <file>` | `Cargo.toml`, `.rs` |
 
-## Reading GHC Diagnostics
+## Reading Diagnostics
+
+### GHC (Haskell)
 
 GHC's typed hole output gives you:
 
@@ -44,6 +48,28 @@ GHC's typed hole output gives you:
 
 !!! warning "Misleading fits"
     GHC may suggest a value that type-checks but is semantically wrong (e.g., `z` instead of a recursive call). Cross-reference with the function's purpose.
+
+### Lean 4
+
+Lean 4's `sorry` and `_` output gives you:
+
+1. **Unsolved goals** — the expected type for each `sorry` or `_`
+2. **Context** — hypotheses available in scope with their types
+3. **Expected type** — the target type the hole must produce
+
+!!! tip "`sorry` vs `_`"
+    `sorry` silences the error and allows compilation to continue — useful for incremental HDD. `_` forces the elaborator to infer and report what's needed. Prefer `sorry` for skeleton stubs.
+
+### Rust
+
+Rust's `todo!()` compiles successfully (it satisfies any return type via `!`), so diagnostics come from type mismatches, not the hole itself.
+
+1. **Replace `todo!()` with `()`** to force "expected X, found ()" errors
+2. **Read "expected ... found ..." messages** for the hole's required type
+3. **Check "help" suggestions** for methods, traits, or conversions
+
+!!! warning "No direct hole fits"
+    Unlike GHC, Rust won't show "valid hole fits" since `todo!()` has type `!`. Rely on surrounding type context and intentional type mismatches to extract constraints.
 
 ## Example: `myFoldr`
 
@@ -71,3 +97,48 @@ myFoldr f z (x:xs) = _cons
 myFoldr f z []     = z
 myFoldr f z (x:xs) = f x (myFoldr f z xs)
 ```
+
+## Example: `myAppend` (Lean 4)
+
+Starting point:
+```lean
+def myAppend (xs ys : List α) : List α := sorry
+```
+
+**Cycle 1:** Build → unsolved goal: `List α`. Introduce pattern matching:
+```lean
+def myAppend : List α → List α → List α
+  | [], ys => sorry  -- HOLE: base
+  | x :: xs, ys => sorry  -- HOLE: cons
+```
+
+**Cycle 2:** Base case: goal is `List α`, context has `ys : List α`. Fill with `ys`.
+
+**Cycle 3:** Cons case: goal is `List α`, context has `x : α`, `xs : List α`, `ys : List α`. Fill with `x :: myAppend xs ys`.
+
+**Cycle 4:** Build succeeds.
+
+## Example: `my_map` (Rust)
+
+Starting point:
+```rust
+fn my_map<T, U>(xs: Vec<T>, f: impl Fn(T) -> U) -> Vec<U> {
+    todo!("map")
+}
+```
+
+**Cycle 1:** Replace `todo!("map")` with `()` → error: "expected `Vec<U>`, found `()`". Introduce structure:
+```rust
+let mut result = Vec::new();
+todo!("iterate and return")
+```
+
+**Cycle 2:** Fill the loop + return:
+```rust
+for x in xs {
+    result.push(f(x));
+}
+result
+```
+
+**Cycle 3:** `cargo build` succeeds.

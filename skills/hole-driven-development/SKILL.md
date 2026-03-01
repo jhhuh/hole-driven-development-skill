@@ -39,7 +39,13 @@ Drive implementation through the compiler's typed hole diagnostics. Write holes,
 
 **One hole per compile cycle.** Fill one, compile, read. Do not batch-fill.
 
-**Use named holes.** When introducing multiple holes, use `_name` (e.g., `_base`, `_recursive`) instead of bare `_`. This makes diagnostics easier to read and holes easier to track across compile cycles.
+**Use named holes.** When introducing multiple holes:
+
+- **Haskell:** Use `_name` (e.g., `_base`, `_recursive`) instead of bare `_`.
+- **Lean 4:** Use `sorry` with a preceding comment (e.g., `-- HOLE: base case` then `sorry`), or bind with `let _base := sorry`.
+- **Rust:** Use `todo!("hole_name")` (e.g., `todo!("base_case")`).
+
+Named holes make diagnostics easier to read and holes easier to track across compile cycles.
 
 **Diagnostics over memory.** Even if you "know" the answer, compile first and let the diagnostics confirm or correct you. The compiler may reveal constraints you missed.
 
@@ -50,8 +56,10 @@ Auto-detect from project structure:
 | Language | Hole syntax | Compile command | Detection |
 |----------|------------|-----------------|-----------|
 | Haskell | `_`, `_name` | `cabal build` if `.cabal` file exists; otherwise `ghc <file> -fno-code` | `.cabal`, `.hs` |
+| Lean 4 | `sorry`, `_` | `lake build` if `lakefile.lean` or `lakefile.toml` exists; otherwise `lean <file>` | `lakefile.lean`, `lakefile.toml`, `.lean` |
+| Rust | `todo!()` | `cargo build` if `Cargo.toml` exists; otherwise `rustc <file>` | `Cargo.toml`, `.rs` |
 
-When using `nix develop`, prefix commands: `nix develop -c ghc ...`
+When using `nix develop`, prefix commands: `nix develop -c <compiler> ...`
 
 ## Autonomy
 
@@ -63,6 +71,8 @@ Run the loop autonomously. **Stop only when:**
 
 ## Reading Diagnostics
 
+### GHC (Haskell)
+
 GHC's typed hole output gives you:
 
 1. **Found hole: `_ :: <type>`** — what type the hole needs
@@ -72,6 +82,26 @@ GHC's typed hole output gives you:
 **Use all three.** Valid fits narrow the search. Relevant bindings show what you can compose. The expected type is the constraint.
 
 **Beware misleading fits.** GHC may suggest a value that type-checks but is semantically wrong (e.g., `z` instead of a recursive call). Cross-reference with the function's purpose.
+
+### Lean 4
+
+Lean 4's `sorry` and `_` output gives you:
+
+1. **Unsolved goals** — the expected type for each `sorry` or `_`
+2. **Context** — hypotheses (variables and their types) available in scope
+3. **Expected type** — the target type the hole must produce
+
+**`sorry` vs `_`.** `sorry` silences the error and allows compilation to continue — useful for incremental HDD. `_` forces the elaborator to infer and report what's needed. Prefer `sorry` for skeleton stubs, switch to `_` when you want the elaborator to narrow the type.
+
+### Rust
+
+Rust's `todo!()` compiles successfully (it satisfies any return type via `!`), so diagnostics come from type mismatches in surrounding code, not from the hole itself. To get useful diagnostics:
+
+1. **Replace `todo!()` with a wrong-type expression** (e.g., `()`) to force a type error showing "expected X, found ()"
+2. **Read "expected ... found ..." messages** — these tell you the hole's required type
+3. **Check "help" suggestions** — rustc often suggests methods, trait implementations, or conversions
+
+**Rust holes don't report like GHC.** Since `todo!()` has type `!` (never), it type-checks in any position. You won't get "valid hole fits." Instead, rely on the surrounding type context and intentional type mismatches to extract constraints.
 
 ## Red Flags — STOP
 

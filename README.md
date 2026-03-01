@@ -84,13 +84,13 @@ Three composable skills:
 
 ```
 hole-driven-development-core                    ← philosophy (always loaded)
-├── hole-driven-development                     ← compiler feedback loop (Haskell)
+├── hole-driven-development                     ← compiler feedback loop (Haskell, Lean 4, Rust)
 └── hole-driven-development-iterative-reasoning ← reasoning loop (any language)
 ```
 
 ## Supported Languages
 
-**Compiler loop:** Haskell (GHC). Lean 4 and Rust planned.
+**Compiler loop:** Haskell (GHC), Lean 4 (`lake`/`lean`), Rust (`cargo`/`rustc`).
 
 **Iterative reasoning:** Python, TypeScript, Go, Bash — any language.
 

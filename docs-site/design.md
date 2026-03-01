@@ -10,10 +10,7 @@ Three-layer, extensible:
 
 ```
 hole-driven-development-core              (philosophy + decomposition)
-├── hole-driven-development               (compiler-feedback loop)
-│   ├── ...-haskell                       (future)
-│   ├── ...-lean4                         (future)
-│   └── ...-rust                          (future)
+├── hole-driven-development               (compiler-feedback loop: Haskell, Lean 4, Rust)
 └── hole-driven-development-iterative-reasoning  (Claude-as-type-checker)
 ```
 
@@ -24,11 +21,11 @@ hole-driven-development-core              (philosophy + decomposition)
 - **Full autonomy**: Claude runs the loop until done, stopping only on ambiguity or being stuck.
 - **Compilation as success criterion**: No tests. The type checker is the oracle.
 - **Visible holes**: Placeholders written to file so human sees skeleton evolve in editor.
-- **Haskell first**: Most mature typed hole support. Lean 4 and Rust follow.
+- **Multi-language in one skill**: Haskell, Lean 4, and Rust share the same compiler loop — only invocation and diagnostics differ.
 - **Auto-detect compiler**: Check project files (`.cabal`, etc.) to determine invocation.
 
 ## Non-Goals
 
-- Language-specific extending skills (Haskell, Lean 4, Rust) — future work
+- Per-language extending skills — decided against; one skill with language-specific sections is simpler
 - Test integration — out of scope; compilation is success
 - IDE integration — these are Claude Code skills, not editor plugins
