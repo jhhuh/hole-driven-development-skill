@@ -26,6 +26,7 @@ theme:
   features:
     - content.code.copy
     - navigation.sections
+    - toc.integrate
 
 markdown_extensions:
   - tables
