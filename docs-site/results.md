@@ -400,13 +400,55 @@ Line counts exclude comments, docstrings, and blank lines.
 
 In 3 of 5 hard experiments, HDD produced substantially less code (30-37% reduction). In 2 of 5, HDD produced slightly *more* code due to explicit decomposition and `select`-based patterns. More importantly, in 3 of 5 experiments (H3, H5, and H2), HDD produced **architecturally different** solutions — different decompositions that emerged from the constraint-first fill order.
 
+### Blind Code Review
+
+Both versions blind-reviewed by three AI judge personas (Bug Hunter, Architect, Pragmatist). Labels randomized — judges didn't know which used HDD. Scores are 1–5.
+
+**Result: Baseline 4 · HDD 1**
+
+| | 🔍 Bugs | 🏗️ Design | 📖 Clarity | |
+|:---|:---:|:---:|:---:|:---|
+| **H1: Type Inference** | | | | |
+| Baseline | ★★★★☆ | ★★★☆☆ | ★★★☆☆ | **Winner** |
+| HDD | ★★☆☆☆ | ★★★★☆ | ★★★★★ | |
+| **H2: Go Pipeline** | | | | |
+| Baseline | ★★★★★ | ★★★★☆ | ★★★★☆ | **Winner** |
+| HDD | ★★★☆☆ | ★★★☆☆ | ★★★☆☆ | |
+| **H3: Three-Way Merge** | | | | |
+| Baseline | ★★★★☆ | ★★★★☆ | ★★☆☆☆ | **Winner** |
+| HDD | ★★☆☆☆ | ★★★☆☆ | ★★★★☆ | |
+| **H4: Build System** | | | | |
+| Baseline | ★★★★★ | ★★★☆☆ | ★★★★★ | **Winner** |
+| HDD | ★★☆☆☆ | ★★★★☆ | ★★☆☆☆ | |
+| **H5: Rate Limiter** | | | | |
+| Baseline | ★★★★☆ | ★★☆☆☆ | ★★☆☆☆ | |
+| HDD | ★★★☆☆ | ★★★★☆ | ★★★★★ | **Winner** |
+
+| Persona | Baseline avg | HDD avg |
+|---|:---:|:---:|
+| 🔍 Bug Hunter | **4.4** | 2.4 |
+| 🏗️ Architect | 3.2 | **3.6** |
+| 📖 Pragmatist | 3.2 | **3.8** |
+
+HDD consistently scores higher on Design (+0.4) and Clarity (+0.6) but dramatically lower on Bugs (−2.0). The iterative hole-filling process produces cleaner architecture but introduces subtle correctness issues — race conditions, non-recursive substitution chains, hunk-skip bugs — that baseline's single-pass approach avoids.
+
+Key bugs found by judges in HDD versions:
+
+- **H1**: `apply_subst` does single-step lookup instead of recursive chain-following
+- **H2**: Context leak in `NewPipeline` (cancel stored on struct), worker drain deadlock on error
+- **H3**: Unconditional `oi += 1; ti += 1` after overlap can skip hunks
+- **H4**: Race condition in `results` dict reads without lock, busy-wait polling
+- **H5**: `PerClientLimiter` releases lock between bucket lookup and acquire
+
+This finding drives the next iteration of skill prompts: HDD needs explicit correctness verification steps after each hole fill.
+
 ---
 
 ## Convergence
 
 **24/24 PASS in Phase 2. Zero skill revisions needed.**
 
-Phase 3 confirmed these results scale to hard problems: in 3/5 experiments HDD produced 30-37% less code, and in 3/5 experiments produced architecturally different solutions.
+Phase 3 confirmed these results scale to hard problems: in 3/5 experiments HDD produced 30-37% less code, and in 3/5 experiments produced architecturally different solutions. However, blind code review revealed HDD introduces subtle correctness bugs (Baseline 4 · HDD 1 in judged comparisons). HDD excels at design and clarity but needs explicit correctness verification to match baseline reliability.
 
 The three rules discovered during Phase 1 RED-GREEN-REFACTOR proved sufficient across all scenarios:
 

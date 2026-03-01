@@ -28,6 +28,33 @@ These skills were developed using TDD applied to documentation (RED-GREEN-REFACT
 
 Tested scenarios range from trivial polymorphic functions to a 15-hole multi-file REST API, a type checker implementation, concurrent Go fanout, and bash backup rotation with no type system at all. Both ambiguity tests correctly triggered stop-and-ask behavior.
 
+## Blind Code Review (Phase 3)
+
+Five 200+ line algorithms, blind-reviewed by three AI judge personas.
+Labels randomized — judges didn't know which version used HDD.
+
+**Score: Baseline 4 · HDD 1**
+
+| | 🔍 Bugs | 🏗️ Design | 📖 Clarity | |
+|:---|:---:|:---:|:---:|:---|
+| **H1: Type Inference** | | | | |
+| Baseline | ★★★★☆ | ★★★☆☆ | ★★★☆☆ | **Winner** |
+| HDD | ★★☆☆☆ | ★★★★☆ | ★★★★★ | |
+| **H2: Go Pipeline** | | | | |
+| Baseline | ★★★★★ | ★★★★☆ | ★★★★☆ | **Winner** |
+| HDD | ★★★☆☆ | ★★★☆☆ | ★★★☆☆ | |
+| **H3: Three-Way Merge** | | | | |
+| Baseline | ★★★★☆ | ★★★★☆ | ★★☆☆☆ | **Winner** |
+| HDD | ★★☆☆☆ | ★★★☆☆ | ★★★★☆ | |
+| **H4: Build System** | | | | |
+| Baseline | ★★★★★ | ★★★☆☆ | ★★★★★ | **Winner** |
+| HDD | ★★☆☆☆ | ★★★★☆ | ★★☆☆☆ | |
+| **H5: Rate Limiter** | | | | |
+| Baseline | ★★★★☆ | ★★☆☆☆ | ★★☆☆☆ | |
+| HDD | ★★★☆☆ | ★★★★☆ | ★★★★★ | **Winner** |
+
+> HDD averages higher on Design (3.6 vs 3.2) and Clarity (3.8 vs 3.2) but lower on Bugs (2.4 vs 4.4). Cleaner architecture, but iterative hole-filling introduces subtle correctness bugs. This drives the next iteration of skill prompts.
+
 Full results: **[jhhuh.github.io/hole-driven-development-skill](https://jhhuh.github.io/hole-driven-development-skill/)**
 
 ## Installation
