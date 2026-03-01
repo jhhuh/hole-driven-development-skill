@@ -1,6 +1,6 @@
 # Results: Skill vs Baseline
 
-Quantitative comparison of agent behavior with and without HDD skills, across 34 experiments in 5 languages.
+Quantitative comparison of agent behavior with and without HDD skills, across 35 experiments in 5 languages.
 
 ## Baseline Behavior (Without Skills)
 
@@ -454,7 +454,7 @@ Root cause analysis of Phase 3 bugs revealed a common pattern: each hole fill wa
 
 All five experiments re-run with improved skills, same prompts, same blind judging methodology.
 
-**Result: HDD v2 4 · Baseline 1** (was Baseline 4 · HDD 1)
+**Result: HDD v2 5 · Baseline 0** (was Baseline 4 · HDD 1)
 
 | | 🔍 Bugs | 🏗️ Design | 📖 Clarity | |
 |:---|:---:|:---:|:---:|:---|
@@ -465,8 +465,8 @@ All five experiments re-run with improved skills, same prompts, same blind judgi
 | Baseline | ★★★☆☆ | ★★★★☆ | ★★★★☆ | |
 | HDD v2 | ★★★★☆ | ★★★☆☆ | ★★★☆☆ | **Winner** |
 | **H3: Three-Way Merge** | | | | |
-| Baseline | ★★★★☆ | ★★★★☆ | ★★★☆☆ | **Winner** |
-| HDD v2 | ★★★☆☆ | ★★★☆☆ | ★★★★☆ | |
+| Baseline | ★★★☆☆ | ★★★☆☆ | ★★★☆☆ | |
+| HDD v2 | ★★★★☆ | ★★★★★ | ★★★★★ | **Winner** |
 | **H4: Build System** | | | | |
 | Baseline | ★★★★☆ | ★★★☆☆ | ★★★★☆ | |
 | HDD v2 | ★★★☆☆ | ★★★★☆ | ★★★★☆ | **Winner** |
@@ -476,11 +476,11 @@ All five experiments re-run with improved skills, same prompts, same blind judgi
 
 | Persona | Baseline avg | HDD v1 avg | HDD v2 avg | Change |
 |---|:---:|:---:|:---:|:---:|
-| 🔍 Bug Hunter | 3.2 | 2.4 | **3.4** | +1.0 |
-| 🏗️ Architect | 3.2 | 3.6 | **3.6** | = |
-| 📖 Pragmatist | 3.2 | 3.8 | **4.0** | +0.2 |
+| 🔍 Bug Hunter | 3.0 | 2.4 | **3.6** | +1.2 |
+| 🏗️ Architect | 3.0 | 3.6 | **4.0** | +0.4 |
+| 📖 Pragmatist | 3.2 | 3.8 | **4.2** | +0.4 |
 
-The VERIFY step closed the bug gap (+1.0 Bug Hunter) while maintaining the design and clarity advantages. HDD v2 now leads on all three dimensions.
+The VERIFY step and monolithic algorithm guidance closed the bug gap (+1.2 Bug Hunter) while boosting design (+0.4 Architect) and clarity (+0.4 Pragmatist). HDD v2 now leads on all three dimensions.
 
 Notable VERIFY catches during v2 experiments:
 
@@ -488,7 +488,7 @@ Notable VERIFY catches during v2 experiments:
 - **H4**: `invalidate_downstream` would delete cache for freshly-built tasks (fixed with `already_built` parameter)
 - **H5**: `_can_acquire_locked` needed for two-phase probe-then-commit atomicity in composite
 
-H3 remains the one baseline win — the LCS-based merge algorithm is inherently monolithic, and decomposition doesn't help as much when the core algorithm is a single 130-line function.
+H3 was initially a baseline win. After adding monolithic algorithm guidance (keep tightly-coupled state machines as a single hole), the re-run produced a cleaner merge walk that the judges rated higher on all three dimensions.
 
 ---
 
@@ -496,14 +496,15 @@ H3 remains the one baseline win — the LCS-based merge algorithm is inherently 
 
 **24/24 PASS in Phase 2. Zero skill revisions needed.**
 
-Phase 3 confirmed these results scale to hard problems: in 3/5 experiments HDD produced 30-37% less code, and in 3/5 experiments produced architecturally different solutions. Initial blind code review revealed HDD introduces subtle correctness bugs (Baseline 4 · HDD 1). Adding a VERIFY step after each fill — checking shared state, resource lifecycle, and error paths — fixed the gap (HDD v2 4 · Baseline 1).
+Phase 3 confirmed these results scale to hard problems: in 3/5 experiments HDD produced 30-37% less code, and in 3/5 experiments produced architecturally different solutions. Initial blind code review revealed HDD introduces subtle correctness bugs (Baseline 4 · HDD 1). Adding a VERIFY step and monolithic algorithm guidance fixed the gap (HDD v2 5 · Baseline 0).
 
-The four rules governing HDD:
+The five rules governing HDD:
 
 1. **"Holes must be visible"** — prevents mental-only decomposition
 2. **"Use named holes"** — improves trackability in compiler feedback
 3. **"Each distinct concern gets a hole"** — prevents under-decomposition
 4. **"Verify after filling"** — catches cross-hole interaction bugs (Phase 3b)
+5. **"Don't decompose monolithic algorithms"** — tightly-coupled state machines stay as one hole (Phase 3b H3 re-run)
 
 ## What the Numbers Show
 

@@ -44,7 +44,7 @@ def _extract_hunks(base: List[str], other: List[str], table: List[List[int]]) ->
 
     Returns hunks sorted by base_start.
     """
-    # Backtrack through LCS table to get list of matched pairs (base_idx, other_idx)
+    # Backtrack through LCS table to get matched pairs (base_idx, other_idx)
     matches: List[Tuple[int, int]] = []
     i, j = len(base), len(other)
     while i > 0 and j > 0:
@@ -82,129 +82,137 @@ def _merge_hunks(
 ) -> Tuple[List[str], bool]:
     """Merge two hunk lists against the same base, producing output lines.
 
-    Walk through the base lines. At each position, check if either (or both)
-    sides have a hunk starting at or covering this position.
-
-    - Non-overlapping hunk from one side: apply it.
-    - Overlapping hunks with identical replacement: apply once (no conflict).
-    - Overlapping hunks with different replacements: emit conflict markers.
-    - No hunk: emit the base line.
+    Dual-cursor state machine: walk through base positions, consuming hunks
+    from both sides. Detect overlaps, apply non-conflicting changes, emit
+    conflict markers for true conflicts.
 
     Returns (merged_lines, has_conflicts).
     """
     output: List[str] = []
     has_conflicts = False
     base_pos = 0
-    oi = 0  # index into hunks_ours
-    ti = 0  # index into hunks_theirs
+    oi = 0  # cursor into hunks_ours
+    ti = 0  # cursor into hunks_theirs
 
-    while base_pos <= len(base) or oi < len(hunks_ours) or ti < len(hunks_theirs):
-        # Find next hunk start from each side (or sentinel past end)
-        o_start = hunks_ours[oi].base_start if oi < len(hunks_ours) else len(base) + 1
-        t_start = hunks_theirs[ti].base_start if ti < len(hunks_theirs) else len(base) + 1
+    while base_pos <= len(base):
+        # --- Determine next hunk from each side (or sentinel past end) ---
+        o_hunk = hunks_ours[oi] if oi < len(hunks_ours) else None
+        t_hunk = hunks_theirs[ti] if ti < len(hunks_theirs) else None
 
-        # Next event position
-        next_event = min(o_start, t_start)
-
-        # If no more events, emit remaining base lines and stop
-        if next_event > len(base):
+        # If no more hunks on either side, emit remaining base and stop
+        if o_hunk is None and t_hunk is None:
             output.extend(base[base_pos:])
             break
 
-        # Emit unchanged base lines up to the next event
-        output.extend(base[base_pos:next_event])
-        base_pos = next_event
+        # --- Find the next event position ---
+        o_start = o_hunk.base_start if o_hunk else len(base) + 1
+        t_start = t_hunk.base_start if t_hunk else len(base) + 1
+        next_event = min(o_start, t_start)
 
-        # Determine which hunks are active at this position
-        ho = hunks_ours[oi] if oi < len(hunks_ours) and hunks_ours[oi].base_start == base_pos else None
-        ht = hunks_theirs[ti] if ti < len(hunks_theirs) and hunks_theirs[ti].base_start == base_pos else None
+        # Emit unchanged base lines up to next event
+        if next_event > base_pos:
+            output.extend(base[base_pos:next_event])
+            base_pos = next_event
 
-        # Check for overlap: one side starts inside the other's base range
-        if ho and not ht and ti < len(hunks_theirs):
-            ht_next = hunks_theirs[ti]
-            if ht_next.base_start < ho.base_end:
-                ht = ht_next
-        if ht and not ho and oi < len(hunks_ours):
-            ho_next = hunks_ours[oi]
-            if ho_next.base_start < ht.base_end:
-                ho = ho_next
+        # --- Check for overlap between current hunks ---
+        # Two hunks overlap if their base ranges intersect: start_a < end_b and start_b < end_a
+        # Adjacent (touching) ranges do NOT overlap: [1,3) and [3,5) don't intersect
+        # Special case: zero-width hunks (pure insertions) at the same position DO overlap
+        both_active = (
+            o_hunk is not None
+            and t_hunk is not None
+            and (
+                (o_hunk.base_start < t_hunk.base_end and t_hunk.base_start < o_hunk.base_end)
+                or (o_hunk.base_start == o_hunk.base_end == t_hunk.base_start == t_hunk.base_end)
+            )
+        )
 
-        if ho and ht:
-            # Both sides have changes in overlapping region
-            # Check for identical changes (same base range and same replacement)
-            if ho.base_start == ht.base_start and ho.base_end == ht.base_end and ho.other_lines == ht.other_lines:
-                # Identical change — apply once, no conflict
-                output.extend(ho.other_lines)
-                base_pos = ho.base_end
-            else:
-                # Conflict: compute the union base range
-                conflict_start = min(ho.base_start, ht.base_start)
-                conflict_end = max(ho.base_end, ht.base_end)
-                # Collect all ours/theirs hunks that fall within the conflict region
-                ours_lines: List[str] = []
-                theirs_lines: List[str] = []
-                # Walk ours hunks overlapping the conflict region
-                o_pos = conflict_start
-                temp_oi = oi
-                while temp_oi < len(hunks_ours) and hunks_ours[temp_oi].base_start < conflict_end:
-                    h = hunks_ours[temp_oi]
-                    ours_lines.extend(base[o_pos:h.base_start])
-                    ours_lines.extend(h.other_lines)
-                    o_pos = h.base_end
-                    temp_oi += 1
-                ours_lines.extend(base[o_pos:conflict_end])
-                # Walk theirs hunks overlapping the conflict region
-                t_pos = conflict_start
-                temp_ti = ti
-                while temp_ti < len(hunks_theirs) and hunks_theirs[temp_ti].base_start < conflict_end:
-                    h = hunks_theirs[temp_ti]
-                    theirs_lines.extend(base[t_pos:h.base_start])
-                    theirs_lines.extend(h.other_lines)
-                    t_pos = h.base_end
-                    temp_ti += 1
-                theirs_lines.extend(base[t_pos:conflict_end])
-
-                # Check if the reconstructed sides are actually the same
-                if ours_lines == theirs_lines:
-                    output.extend(ours_lines)
-                else:
-                    has_conflicts = True
-                    # Ensure conflict markers are on their own lines
-                    if ours_lines and ours_lines[-1] and not ours_lines[-1].endswith("\n"):
-                        ours_lines[-1] += "\n"
-                    if theirs_lines and theirs_lines[-1] and not theirs_lines[-1].endswith("\n"):
-                        theirs_lines[-1] += "\n"
-                    output.append("<<<<<<< OURS\n")
-                    output.extend(ours_lines)
-                    output.append("=======\n")
-                    output.extend(theirs_lines)
-                    output.append(">>>>>>> THEIRS\n")
-
-                base_pos = conflict_end
-                # Advance hunk indices past the conflict region
-                while oi < len(hunks_ours) and hunks_ours[oi].base_start < conflict_end:
-                    oi += 1
-                while ti < len(hunks_theirs) and hunks_theirs[ti].base_start < conflict_end:
-                    ti += 1
+        if both_active:
+            # --- OVERLAP: both sides modify intersecting base regions ---
+            assert o_hunk is not None and t_hunk is not None  # for type checker
+            # Identical change shortcut
+            if (o_hunk.base_start == t_hunk.base_start
+                    and o_hunk.base_end == t_hunk.base_end
+                    and o_hunk.other_lines == t_hunk.other_lines):
+                output.extend(o_hunk.other_lines)
+                base_pos = o_hunk.base_end
+                oi += 1
+                ti += 1
                 continue
 
+            # Compute the union base range of all overlapping hunks
+            conflict_base_start = min(o_hunk.base_start, t_hunk.base_start)
+            conflict_base_end = max(o_hunk.base_end, t_hunk.base_end)
+            # Record where the conflict hunks begin in each list
+            oi_first = oi
+            ti_first = ti
+            # Advance past the initial pair
             oi += 1
             ti += 1
+            # Expand if further hunks from either side overlap the conflict region
+            expanded = True
+            while expanded:
+                expanded = False
+                while oi < len(hunks_ours) and hunks_ours[oi].base_start < conflict_base_end:
+                    if hunks_ours[oi].base_end > conflict_base_end:
+                        conflict_base_end = hunks_ours[oi].base_end
+                        expanded = True
+                    oi += 1
+                while ti < len(hunks_theirs) and hunks_theirs[ti].base_start < conflict_base_end:
+                    if hunks_theirs[ti].base_end > conflict_base_end:
+                        conflict_base_end = hunks_theirs[ti].base_end
+                        expanded = True
+                    ti += 1
 
-        elif ho:
-            # Only ours changed this region
-            output.extend(ho.other_lines)
-            base_pos = ho.base_end
+            # Reconstruct each side's view of the conflict region
+            # Build ours_lines: apply ours hunks within conflict region, keep base elsewhere
+            ours_lines: List[str] = []
+            pos = conflict_base_start
+            for idx in range(oi_first, oi):
+                h = hunks_ours[idx]
+                ours_lines.extend(base[pos:h.base_start])
+                ours_lines.extend(h.other_lines)
+                pos = h.base_end
+            ours_lines.extend(base[pos:conflict_base_end])
+
+            # Build theirs_lines: apply theirs hunks within conflict region, keep base elsewhere
+            theirs_lines: List[str] = []
+            pos = conflict_base_start
+            for idx in range(ti_first, ti):
+                h = hunks_theirs[idx]
+                theirs_lines.extend(base[pos:h.base_start])
+                theirs_lines.extend(h.other_lines)
+                pos = h.base_end
+            theirs_lines.extend(base[pos:conflict_base_end])
+
+            # If reconstructed sides match, it's not a real conflict
+            if ours_lines == theirs_lines:
+                output.extend(ours_lines)
+            else:
+                has_conflicts = True
+                output.append("<<<<<<< OURS\n")
+                output.extend(ours_lines)
+                output.append("=======\n")
+                output.extend(theirs_lines)
+                output.append(">>>>>>> THEIRS\n")
+
+            base_pos = conflict_base_end
+            # oi and ti already advanced past conflict region by the expansion loop
+
+        elif o_hunk is not None and o_start <= t_start:
+            # --- Only ours has a hunk at this position ---
+            output.extend(o_hunk.other_lines)
+            base_pos = o_hunk.base_end
             oi += 1
 
-        elif ht:
-            # Only theirs changed this region
-            output.extend(ht.other_lines)
-            base_pos = ht.base_end
+        elif t_hunk is not None:
+            # --- Only theirs has a hunk at this position ---
+            output.extend(t_hunk.other_lines)
+            base_pos = t_hunk.base_end
             ti += 1
 
         else:
-            # No hunk at this position — emit one base line and advance
+            # Should not reach here, but guard against infinite loop
             if base_pos < len(base):
                 output.append(base[base_pos])
                 base_pos += 1

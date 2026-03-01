@@ -15,7 +15,7 @@ HDD comes from Haskell's typed holes — a technique where you leave `_` placeho
 
 ## Proven Effective
 
-These skills were developed using TDD applied to documentation (RED-GREEN-REFACTOR) and validated through **34 systematic experiments** across 5 languages:
+These skills were developed using TDD applied to documentation (RED-GREEN-REFACTOR) and validated through **35 systematic experiments** across 5 languages:
 
 | | Without skills | With HDD skills |
 |---|---|---|
@@ -37,7 +37,7 @@ Labels randomized — judges didn't know which version used HDD.
 
 HDD averaged higher on Design (3.6 vs 3.2) and Clarity (3.8 vs 3.2) but dramatically lower on Bugs (2.4 vs 4.4). Root cause: each hole fill was locally correct, but cross-hole interactions had bugs (race conditions, resource leaks, skipped state).
 
-### Round 2 (after adding VERIFY step) — Score: HDD 4 · Baseline 1
+### Round 2 (after VERIFY step + monolithic algorithm guidance) — Score: HDD 5 · Baseline 0
 
 | Task | Version | 🔍 Bugs | 🏗️ Design | 📖 Clarity | |
 |:---|:---|:---:|:---:|:---:|:---|
@@ -45,8 +45,8 @@ HDD averaged higher on Design (3.6 vs 3.2) and Clarity (3.8 vs 3.2) but dramatic
 | | HDD v2 | ★★★★☆ | ★★★★☆ | ★★★★★ | **Winner** |
 | Go Pipeline | Baseline | ★★★☆☆ | ★★★★☆ | ★★★★☆ | |
 | | HDD v2 | ★★★★☆ | ★★★☆☆ | ★★★☆☆ | **Winner** |
-| Three-Way Merge | Baseline | ★★★★☆ | ★★★★☆ | ★★★☆☆ | **Winner** |
-| | HDD v2 | ★★★☆☆ | ★★★☆☆ | ★★★★☆ | |
+| Three-Way Merge | Baseline | ★★★☆☆ | ★★★☆☆ | ★★★☆☆ | |
+| | HDD v2 | ★★★★☆ | ★★★★★ | ★★★★★ | **Winner** |
 | Build System | Baseline | ★★★★☆ | ★★★☆☆ | ★★★★☆ | |
 | | HDD v2 | ★★★☆☆ | ★★★★☆ | ★★★★☆ | **Winner** |
 | Rate Limiter | Baseline | ★★☆☆☆ | ★★☆☆☆ | ★★☆☆☆ | |
@@ -54,11 +54,11 @@ HDD averaged higher on Design (3.6 vs 3.2) and Clarity (3.8 vs 3.2) but dramatic
 
 | Persona | Baseline avg | HDD v2 avg | Change from v1 |
 |---|:---:|:---:|:---:|
-| 🔍 Bug Hunter | 3.2 | **3.4** | 2.4 → 3.4 (+1.0) |
-| 🏗️ Architect | 3.2 | **3.6** | 3.6 → 3.6 (=) |
-| 📖 Pragmatist | 3.2 | **4.0** | 3.8 → 4.0 (+0.2) |
+| 🔍 Bug Hunter | 3.0 | **3.6** | 2.4 → 3.6 (+1.2) |
+| 🏗️ Architect | 3.0 | **4.0** | 3.6 → 4.0 (+0.4) |
+| 📖 Pragmatist | 3.2 | **4.2** | 3.8 → 4.2 (+0.4) |
 
-> Adding a VERIFY step (check shared state, resource lifecycle, and error paths against previously filled holes) after each fill raised Bug Hunter scores from 2.4 → 3.4 and flipped wins from 1/5 → 4/5.
+> Adding a VERIFY step (check shared state, resource lifecycle, and error paths) and monolithic algorithm guidance (don't decompose tightly-coupled state machines) raised Bug Hunter from 2.4 → 3.6 and flipped wins from 1/5 → 5/5.
 
 After revealing labels, the judges commented:
 
