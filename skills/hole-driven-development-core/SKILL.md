@@ -15,12 +15,16 @@ Implement top-down by decomposition. Start with the outermost structure, leave *
 
 ```
 1. Receive intention (type signature, spec, or description)
-2. Write skeleton with HOLES for each unknown sub-problem
+2. Write skeleton to the file with HOLES for each unknown sub-problem
 3. Pick the most constrained hole (fewest valid fills)
 4. Determine what the hole needs (type, contract, inputs available)
-5. Fill it — introduce sub-holes if the fill is itself complex
+5. Fill ONE hole in the file — introduce sub-holes if the fill is itself complex
 6. Repeat from 3 until no holes remain
 ```
+
+**Holes must be visible.** Write holes to the file, not just in your reasoning. Each iteration of the loop edits the file — the human should see the skeleton evolve in their editor.
+
+**One hole per iteration.** Fill exactly one hole, then reassess. Do not batch-fill.
 
 **Most constrained first.** When multiple holes exist, fill the one with the narrowest contract — it has the fewest possible implementations, so you're least likely to get it wrong.
 
@@ -39,8 +43,10 @@ No holes remain and the code satisfies the original intention.
 ## Red Flags — STOP
 
 - Writing a complete implementation without first creating holes
+- Keeping holes in your head instead of writing them to the file
 - Filling multiple holes in a single step
 - Skipping hole analysis ("I already know the answer")
+- Writing the final code directly and claiming you "decomposed mentally"
 - Creating artificial decomposition for trivial one-liners (1-2 lines of obvious code)
 
-**If you catch yourself doing any of these: STOP. Delete. Start with holes.**
+**If you catch yourself doing any of these: STOP. Delete. Start with holes in the file.**
