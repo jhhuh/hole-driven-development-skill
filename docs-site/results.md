@@ -36,7 +36,8 @@ This was observed across all three baseline tests (Python TOC generator, Haskell
 | **Tool calls** | 5 | 19 |
 | **Holes** | 0 | 4 |
 | **Structure** | 1 monolithic function | 5 focused functions |
-| **Source** | [baseline-toc.py](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-core/results/baseline-toc.py) | [green-toc.py](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-core/results/green-toc.py) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-core/results/green-assessment.md) |
+
+Source: [baseline-toc.py](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-core/results/baseline-toc.py) · [green-toc.py](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-core/results/green-toc.py) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-core/results/green-assessment.md)
 
 ### Python CSV Parser (Iterative Reasoning)
 
@@ -46,7 +47,8 @@ This was observed across all three baseline tests (Python TOC generator, Haskell
 | **Tool calls** | 7 | 14 |
 | **Holes** | 0 | 3 + 1 sub-hole |
 | **Contract reasoning** | Implicit | Explicit per hole |
-| **Source** | [baseline-csv.py](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/baseline-csv.py) | [green-csv.py](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/green-csv.py) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/green-assessment.md) |
+
+Source: [baseline-csv.py](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/baseline-csv.py) · [green-csv.py](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/green-csv.py) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/green-assessment.md)
 
 ### Haskell myFoldr (Compiler Loop)
 
@@ -56,7 +58,8 @@ This was observed across all three baseline tests (Python TOC generator, Haskell
 | **Compile cycles** | 3 (batched) | 5 (one hole per cycle) |
 | **Holes** | Used but batch-filled | 4 (including sub-hole `_rest`) |
 | **Discipline** | Filled 2 holes in 1 cycle | Strict 1:1 fill-to-cycle ratio |
-| **Source** | [baseline-Lib.hs](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/baseline-Lib.hs) | [green-Lib.hs](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/green-Lib.hs) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/green-assessment.md) |
+
+Source: [baseline-Lib.hs](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/baseline-Lib.hs) · [green-Lib.hs](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/green-Lib.hs) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/green-assessment.md)
 
 ## Phase 2: Full Experiment Results
 
