@@ -30,45 +30,33 @@ This was observed across all three baseline tests (Python TOC generator, Haskell
 
 ### Python TOC Generator (Core Skill)
 
-=== "Baseline"
-
-    Agent wrote everything in a single function body — parse, slugify, deduplicate, format — all at once. No decomposition visible in the file. 5 tool calls.
-
-    [:material-file-code: baseline-toc.py](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-core/results/baseline-toc.py)
-
-=== "With HDD"
-
-    Agent created 4 holes (`_extract_headings`, `_make_slug`, `_deduplicate_slug`, `_format_entry`), each starting as `raise NotImplementedError(...)`. Filled most constrained first (`_format_entry` → `_deduplicate_slug` → `_extract_headings` → `_make_slug`). 19 tool calls.
-
-    [:material-file-code: green-toc.py](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-core/results/green-toc.py) · [:material-file-document: assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-core/results/green-assessment.md)
+| | Baseline | With HDD |
+|---|---|---|
+| **Behavior** | Wrote everything in a single function body — parse, slugify, deduplicate, format — all at once. No decomposition visible in the file. | Created 4 holes (`_extract_headings`, `_make_slug`, `_deduplicate_slug`, `_format_entry`), each starting as `raise NotImplementedError(...)`. Filled most constrained first. |
+| **Tool calls** | 5 | 19 |
+| **Holes** | 0 | 4 |
+| **Structure** | 1 monolithic function | 5 focused functions |
+| **Source** | [baseline-toc.py](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-core/results/baseline-toc.py) | [green-toc.py](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-core/results/green-toc.py) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-core/results/green-assessment.md) |
 
 ### Python CSV Parser (Iterative Reasoning)
 
-=== "Baseline"
-
-    Agent identified sub-problems (row splitting, quote-aware parsing, header mapping) in its reasoning, but wrote all 17 lines at once. The human never sees intermediate states. 7 tool calls.
-
-    [:material-file-code: baseline-csv.py](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/baseline-csv.py)
-
-=== "With HDD"
-
-    Agent wrote skeleton with `NotImplementedError` hole markers. Filled HOLE_1 (parse_row) first because HOLE_2 depends on it. Explicit contract reasoning before each fill. 14 tool calls.
-
-    [:material-file-code: green-csv.py](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/green-csv.py) · [:material-file-document: assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/green-assessment.md)
+| | Baseline | With HDD |
+|---|---|---|
+| **Behavior** | Identified sub-problems (row splitting, quote-aware parsing, header mapping) in reasoning, but wrote all 17 lines at once. The human never sees intermediate states. | Wrote skeleton with `NotImplementedError` hole markers. Filled HOLE_1 (parse_row) first because HOLE_2 depends on it. Explicit contract reasoning before each fill. |
+| **Tool calls** | 7 | 14 |
+| **Holes** | 0 | 3 + 1 sub-hole |
+| **Contract reasoning** | Implicit | Explicit per hole |
+| **Source** | [baseline-csv.py](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/baseline-csv.py) | [green-csv.py](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/green-csv.py) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development-iterative-reasoning/results/green-assessment.md) |
 
 ### Haskell myFoldr (Compiler Loop)
 
-=== "Baseline"
-
-    When instructed to use HDD, agent used the compiler loop but batch-filled two holes in one cycle.
-
-    [:material-file-code: baseline-Lib.hs](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/baseline-Lib.hs)
-
-=== "With HDD"
-
-    Strict one-hole-per-cycle discipline. Named holes (`_empty`, `_cons`, `_rest`). 5 compile cycles. Caught misleading GHC suggestion (`z` for the recursive case) by cross-referencing with function purpose.
-
-    [:material-file-code: green-Lib.hs](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/green-Lib.hs) · [:material-file-document: assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/green-assessment.md)
+| | Baseline | With HDD |
+|---|---|---|
+| **Behavior** | When instructed to use HDD, agent used the compiler loop but batch-filled two holes in one cycle. | Strict one-hole-per-cycle discipline. Named holes (`_empty`, `_cons`, `_rest`). Caught misleading GHC suggestion (`z` for recursive case) by cross-referencing with function purpose. |
+| **Compile cycles** | 3 (batched) | 5 (one hole per cycle) |
+| **Holes** | Used but batch-filled | 4 (including sub-hole `_rest`) |
+| **Discipline** | Filled 2 holes in 1 cycle | Strict 1:1 fill-to-cycle ratio |
+| **Source** | [baseline-Lib.hs](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/baseline-Lib.hs) | [green-Lib.hs](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/green-Lib.hs) · [assessment](https://github.com/jhhuh/hole-driven-development-skill/blob/@COMMIT_SHA@/tests/hole-driven-development/results/green-assessment.md) |
 
 ## Phase 2: Full Experiment Results
 
