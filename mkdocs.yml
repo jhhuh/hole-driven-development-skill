@@ -1,0 +1,46 @@
+site_name: Hole Driven Development Skills
+site_description: Claude Code skills for top-down programming with typed holes
+site_url: https://jhhuh.github.io/hole-driven-development-skill/
+repo_url: https://github.com/jhhuh/hole-driven-development-skill
+repo_name: jhhuh/hole-driven-development-skill
+
+docs_dir: docs-site
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - content.code.copy
+    - navigation.sections
+
+markdown_extensions:
+  - tables
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - Skills:
+    - Core: skills/core.md
+    - Compiler Loop: skills/compiler-loop.md
+    - Iterative Reasoning: skills/iterative-reasoning.md
+  - Demo: demo.md
+  - Design: design.md

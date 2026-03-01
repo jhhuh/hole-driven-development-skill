@@ -15,6 +15,8 @@
             tmux
             ghc
             cabal-install
+            python3
+            python3Packages.mkdocs-material
           ];
         };
       });
