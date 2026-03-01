@@ -10,10 +10,10 @@
 
 | # | Name | Round | Run | Grade | Revision | Notes |
 |---|------|-------|-----|-------|----------|-------|
-| C1 | Trivial one-liner | 1 | 1 | | | |
-| C2 | Already-decomposed code | 1 | 1 | | | |
-| C3 | Time pressure phrasing | 1 | 1 | | | |
-| C4 | Competing instruction | 1 | 1 | | | |
+| C1 | Trivial one-liner | 1 | 1 | PASS | none | Correctly skipped HDD, cited red flag |
+| C2 | Already-decomposed code | 1 | 1 | PASS | none | Recognized composition, no artificial holes |
+| C3 | Time pressure phrasing | 1 | 1 | PASS | none | 3 holes, 14 tool calls despite urgency |
+| C4 | Competing instruction | 1 | 1 | PASS | none | 4 holes, 8 tool calls, overrode "just write it" |
 
 ## Suite A: Compiler Loop — Haskell
 
