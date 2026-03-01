@@ -19,10 +19,10 @@
 
 | # | Name | Round | Run | Grade | Revision | Notes |
 |---|------|-------|-----|-------|----------|-------|
-| A1 | Trivial polymorphic (myMap) | 2 | 1 | | | |
-| A2 | Typeclass-constrained (mySort) | 2 | 1 | | | |
-| A3 | Higher-order multiple holes (foldMap) | 2 | 1 | | | |
-| A4 | ADT pattern matching (Expr eval) | 2 | 1 | | | |
+| A1 | Trivial polymorphic (myMap) | 2 | 1 | PASS | none | 5 cycles, 4 holes, sub-hole _tail |
+| A2 | Typeclass-constrained (mySort) | 2 | 1 | PASS | none | 9 cycles, 8 holes, Ord used from diagnostics |
+| A3 | Higher-order multiple holes (foldMap) | 2 | 1 | PASS | none | 3 cycles, _baseCase most constrained |
+| A4 | ADT pattern matching (Expr eval) | 2 | 1 | PASS | none | 6 cycles, case-split then base-first |
 | A5 | Monadic code (State monad) | 3 | 1 | | | |
 | A6 | Parser combinator | 3 | 1 | | | |
 | A7 | Ambiguous hole (mystery) | 3 | 1 | | | |
