@@ -1,0 +1,46 @@
+---
+name: hole-driven-development-core
+description: Use when implementing functions or modules top-down by decomposing into typed holes, filling iteratively from most constrained to least
+---
+
+# Hole Driven Development — Core
+
+## Overview
+
+Implement top-down by decomposition. Start with the outermost structure, leave **holes** for unknown parts, then fill each hole iteratively — possibly introducing smaller holes — until none remain.
+
+**Core principle:** Never write a complete implementation in one pass. Decompose first, fill later.
+
+## The Loop
+
+```
+1. Receive intention (type signature, spec, or description)
+2. Write skeleton with HOLES for each unknown sub-problem
+3. Pick the most constrained hole (fewest valid fills)
+4. Determine what the hole needs (type, contract, inputs available)
+5. Fill it — introduce sub-holes if the fill is itself complex
+6. Repeat from 3 until no holes remain
+```
+
+**Most constrained first.** When multiple holes exist, fill the one with the narrowest contract — it has the fewest possible implementations, so you're least likely to get it wrong.
+
+**When ambiguous** — multiple equally valid fills — STOP and ask the human.
+
+## Success Criterion
+
+No holes remain and the code satisfies the original intention.
+
+## What This Skill Does NOT Cover
+
+- **How** to determine what a hole needs — that depends on the extending skill:
+  - Compiler-feedback loop: `hole-driven-development` (runs compiler, reads diagnostics)
+  - Iterative reasoning: `hole-driven-development-iterative-reasoning` (Claude reasons about contracts)
+
+## Red Flags — STOP
+
+- Writing a complete implementation without first creating holes
+- Filling multiple holes in a single step
+- Skipping hole analysis ("I already know the answer")
+- Creating artificial decomposition for trivial one-liners (1-2 lines of obvious code)
+
+**If you catch yourself doing any of these: STOP. Delete. Start with holes.**
