@@ -120,5 +120,11 @@ The Skill Revision Log remained empty throughout Phase 2. The three rules discov
 ### What could be improved
 
 - **D3/D4 "stuck" tests were too easy.** The type family problem was solved in 2 cycles; the CSP solver was completed without difficulty. Harder scenarios could stress-test the stop conditions.
-- **Lean 4 and Rust support** added to the compiler loop skill (multi-language in one skill, not per-language extending skills).
 - **Bash-specific ordering constraint.** The `echo && exit 1` hole marker kills the script, forcing holes to be filled in sequential order. In typed languages, holes can be filled in any order.
+
+### Improvements made after Phase 2
+
+- **Lean 4 and Rust support** added to the compiler loop skill (multi-language in one skill, not per-language extending skills).
+- **VERIFY step** added after each fill — checks shared state, resource lifecycle, error paths. Triggered by Phase 3 blind review showing HDD lost 4/5 on bugs.
+- **Monolithic algorithm guidance** — don't decompose tightly-coupled state machines. Triggered by H3 merge experiment where decomposition introduced seam bugs.
+- **REVIEW-ALL holistic pass** added as final step before declaring done. Addresses systemic bugs that per-hole VERIFY can't catch.

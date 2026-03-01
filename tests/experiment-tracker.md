@@ -50,16 +50,35 @@
 | D3 | Getting stuck — compiler (type families) | 6 | 1 | PASS | none | Solved in 2 cycles, GHC resolved type family |
 | D4 | Getting stuck — reasoning (CSP solver) | 6 | 1 | PASS | none | 6 holes, AC-3 + MAC backtracking, completed |
 
+## Suite H: Hard Experiments (Phase 3) — Blind Code Review
+
+| # | Name | Round | Run | Baseline | HDD v2 | Winner | Notes |
+|---|------|-------|-----|----------|--------|--------|-------|
+| H1 | Hindley-Milner Type Inference | 7 | 2 | Bug 3 Arch 3 Prag 3 | Bug 4 Arch 4 Prag 5 | HDD v2 | VERIFY caught non-recursive subst chain |
+| H2 | Concurrent Go Pipeline | 7 | 2 | Bug 3 Arch 4 Prag 4 | Bug 4 Arch 3 Prag 3 | HDD v2 | VERIFY caught data race on ch variable |
+| H3 | Three-Way Merge | 7 | 3 | Bug 3 Arch 3 Prag 3 | Bug 4 Arch 5 Prag 5 | HDD v2 | Re-run with monolithic guidance; kept merge walk as single hole |
+| H4 | Incremental Build System | 7 | 2 | Bug 4 Arch 3 Prag 4 | Bug 3 Arch 4 Prag 4 | HDD v2 | VERIFY caught invalidate_downstream bug |
+| H5 | Composable Rate Limiter | 7 | 2 | Bug 2 Arch 2 Prag 2 | Bug 3 Arch 4 Prag 4 | HDD v2 | VERIFY caught two-phase atomicity issue |
+
 ## Convergence Status
 
-**CONVERGED** — 24/24 PASS on first run, zero skill revisions.
+**Phase 2: CONVERGED** — 24/24 PASS on first run, zero skill revisions.
 
-Phase 1 RED-GREEN-REFACTOR identified three critical rules that proved sufficient across all 24 experiments:
+**Phase 3: HDD v2 wins 5/5 blind reviews** after three skill improvements (VERIFY, monolithic guidance, REVIEW-ALL).
+
+Five rules governing HDD:
 1. **"Holes must be visible"** — prevents mental-only decomposition
 2. **"Use named holes"** — improves trackability in compiler feedback
 3. **"Each distinct concern gets a hole"** — prevents under-decomposition
+4. **"Verify after filling"** — catches cross-hole interaction bugs
+5. **"Don't decompose monolithic algorithms"** — tightly-coupled state machines stay as one hole
 
 ## Skill Revision Log
 
 | Date | Skill | What changed | Triggered by |
 |------|-------|-------------|-------------|
+| 2026-03-01 | all three | Added VERIFY step after each fill | Phase 3 blind review: HDD lost 4/5 on bugs |
+| 2026-03-01 | all three | Added "When NOT to decompose" monolithic guidance | H3 merge: decomposing dual-cursor walk introduced seam bugs |
+| 2026-03-01 | all three | Added REVIEW-ALL holistic pass before done | Bug Hunter critique: systemic bugs hide in composition |
+| 2026-03-01 | compiler-loop | Added Lean 4 support (sorry/_, lake build) | Language expansion |
+| 2026-03-01 | compiler-loop | Added Rust support (todo!(), cargo build) | Language expansion |

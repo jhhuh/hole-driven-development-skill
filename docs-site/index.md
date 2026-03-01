@@ -10,7 +10,7 @@ Without these skills, Claude Code writes complete implementations in one pass â€
 
 With HDD skills, the agent decomposes first, then fills one piece at a time. You watch the skeleton evolve in your editor and can intervene at any step.
 
-!!! success "Validated across 24 experiments in 5 languages with 24/24 PASS"
+!!! success "Validated across 35 experiments in 5 languages â€” Phase 2: 24/24 PASS, Phase 3: HDD wins 5/5 blind reviews"
 
 | | Without skills | With HDD skills |
 |---|---|---|
