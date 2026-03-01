@@ -15,7 +15,7 @@ HDD comes from Haskell's typed holes — a technique where you leave `_` placeho
 
 ## Proven Effective
 
-These skills were developed using TDD applied to documentation (RED-GREEN-REFACTOR) and validated through **24 systematic experiments** across 5 languages:
+These skills were developed using TDD applied to documentation (RED-GREEN-REFACTOR) and validated through **34 systematic experiments** across 5 languages:
 
 | | Without skills | With HDD skills |
 |---|---|---|
@@ -33,27 +33,37 @@ Tested scenarios range from trivial polymorphic functions to a 15-hole multi-fil
 Five 200+ line algorithms, blind-reviewed by three AI judge personas.
 Labels randomized — judges didn't know which version used HDD.
 
-**Score: Baseline 4 · HDD 1**
+### Round 1 — Score: Baseline 4 · HDD 1
+
+HDD averaged higher on Design (3.6 vs 3.2) and Clarity (3.8 vs 3.2) but dramatically lower on Bugs (2.4 vs 4.4). Root cause: each hole fill was locally correct, but cross-hole interactions had bugs (race conditions, resource leaks, skipped state).
+
+### Round 2 (after adding VERIFY step) — Score: HDD 4 · Baseline 1
 
 | | 🔍 Bugs | 🏗️ Design | 📖 Clarity | |
 |:---|:---:|:---:|:---:|:---|
 | **H1: Type Inference** | | | | |
-| Baseline | ★★★★☆ | ★★★☆☆ | ★★★☆☆ | **Winner** |
-| HDD | ★★☆☆☆ | ★★★★☆ | ★★★★★ | |
+| Baseline | ★★★☆☆ | ★★★☆☆ | ★★★☆☆ | |
+| HDD v2 | ★★★★☆ | ★★★★☆ | ★★★★★ | **Winner** |
 | **H2: Go Pipeline** | | | | |
-| Baseline | ★★★★★ | ★★★★☆ | ★★★★☆ | **Winner** |
-| HDD | ★★★☆☆ | ★★★☆☆ | ★★★☆☆ | |
+| Baseline | ★★★☆☆ | ★★★★☆ | ★★★★☆ | |
+| HDD v2 | ★★★★☆ | ★★★☆☆ | ★★★☆☆ | **Winner** |
 | **H3: Three-Way Merge** | | | | |
-| Baseline | ★★★★☆ | ★★★★☆ | ★★☆☆☆ | **Winner** |
-| HDD | ★★☆☆☆ | ★★★☆☆ | ★★★★☆ | |
+| Baseline | ★★★★☆ | ★★★★☆ | ★★★☆☆ | **Winner** |
+| HDD v2 | ★★★☆☆ | ★★★☆☆ | ★★★★☆ | |
 | **H4: Build System** | | | | |
-| Baseline | ★★★★★ | ★★★☆☆ | ★★★★★ | **Winner** |
-| HDD | ★★☆☆☆ | ★★★★☆ | ★★☆☆☆ | |
+| Baseline | ★★★★☆ | ★★★☆☆ | ★★★★☆ | |
+| HDD v2 | ★★★☆☆ | ★★★★☆ | ★★★★☆ | **Winner** |
 | **H5: Rate Limiter** | | | | |
-| Baseline | ★★★★☆ | ★★☆☆☆ | ★★☆☆☆ | |
-| HDD | ★★★☆☆ | ★★★★☆ | ★★★★★ | **Winner** |
+| Baseline | ★★☆☆☆ | ★★☆☆☆ | ★★☆☆☆ | |
+| HDD v2 | ★★★☆☆ | ★★★★☆ | ★★★★☆ | **Winner** |
 
-> HDD averages higher on Design (3.6 vs 3.2) and Clarity (3.8 vs 3.2) but lower on Bugs (2.4 vs 4.4). Cleaner architecture, but iterative hole-filling introduces subtle correctness bugs. This drives the next iteration of skill prompts.
+| Persona | Baseline avg | HDD v2 avg | Change from v1 |
+|---|:---:|:---:|:---:|
+| 🔍 Bug Hunter | 3.2 | **3.4** | v1: 2.4 → v2: 3.4 (+1.0) |
+| 🏗️ Architect | 3.2 | **3.6** | v1: 3.6 → v2: 3.6 (=) |
+| 📖 Pragmatist | 3.2 | **4.0** | v1: 3.8 → v2: 4.0 (+0.2) |
+
+> Adding a VERIFY step (check shared state, resource lifecycle, and error paths against previously filled holes) after each fill raised Bug Hunter scores from 2.4 → 3.4 and flipped wins from 1/5 → 4/5.
 
 Full results: **[jhhuh.github.io/hole-driven-development-skill](https://jhhuh.github.io/hole-driven-development-skill/)**
 

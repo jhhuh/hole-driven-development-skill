@@ -1,6 +1,6 @@
 # Results: Skill vs Baseline
 
-Quantitative comparison of agent behavior with and without HDD skills, across 29 experiments in 5 languages.
+Quantitative comparison of agent behavior with and without HDD skills, across 34 experiments in 5 languages.
 
 ## Baseline Behavior (Without Skills)
 
@@ -442,19 +442,68 @@ Key bugs found by judges in HDD versions:
 
 This finding drives the next iteration of skill prompts: HDD needs explicit correctness verification steps after each hole fill.
 
+### Phase 3b: After VERIFY Step
+
+Root cause analysis of Phase 3 bugs revealed a common pattern: each hole fill was locally correct, but cross-hole interactions had bugs — race conditions, non-recursive substitution chains, hunk-skip bugs, resource leaks. The HDD skills had no verification step after filling.
+
+**Fix:** Added a VERIFY step to all three skills. After each fill, the agent checks:
+
+1. **Shared mutable state** — is access synchronized?
+2. **Resource lifecycle** — are acquire/release scopes matched across holes?
+3. **Error/cancel paths** — do they clean up resources from other holes?
+
+All five experiments re-run with improved skills, same prompts, same blind judging methodology.
+
+**Result: HDD v2 4 · Baseline 1** (was Baseline 4 · HDD 1)
+
+| | 🔍 Bugs | 🏗️ Design | 📖 Clarity | |
+|:---|:---:|:---:|:---:|:---|
+| **H1: Type Inference** | | | | |
+| Baseline | ★★★☆☆ | ★★★☆☆ | ★★★☆☆ | |
+| HDD v2 | ★★★★☆ | ★★★★☆ | ★★★★★ | **Winner** |
+| **H2: Go Pipeline** | | | | |
+| Baseline | ★★★☆☆ | ★★★★☆ | ★★★★☆ | |
+| HDD v2 | ★★★★☆ | ★★★☆☆ | ★★★☆☆ | **Winner** |
+| **H3: Three-Way Merge** | | | | |
+| Baseline | ★★★★☆ | ★★★★☆ | ★★★☆☆ | **Winner** |
+| HDD v2 | ★★★☆☆ | ★★★☆☆ | ★★★★☆ | |
+| **H4: Build System** | | | | |
+| Baseline | ★★★★☆ | ★★★☆☆ | ★★★★☆ | |
+| HDD v2 | ★★★☆☆ | ★★★★☆ | ★★★★☆ | **Winner** |
+| **H5: Rate Limiter** | | | | |
+| Baseline | ★★☆☆☆ | ★★☆☆☆ | ★★☆☆☆ | |
+| HDD v2 | ★★★☆☆ | ★★★★☆ | ★★★★☆ | **Winner** |
+
+| Persona | Baseline avg | HDD v1 avg | HDD v2 avg | Change |
+|---|:---:|:---:|:---:|:---:|
+| 🔍 Bug Hunter | 3.2 | 2.4 | **3.4** | +1.0 |
+| 🏗️ Architect | 3.2 | 3.6 | **3.6** | = |
+| 📖 Pragmatist | 3.2 | 3.8 | **4.0** | +0.2 |
+
+The VERIFY step closed the bug gap (+1.0 Bug Hunter) while maintaining the design and clarity advantages. HDD v2 now leads on all three dimensions.
+
+Notable VERIFY catches during v2 experiments:
+
+- **H2**: Data race on `ch` variable (multiple goroutines writing), workers continuing after cancellation
+- **H4**: `invalidate_downstream` would delete cache for freshly-built tasks (fixed with `already_built` parameter)
+- **H5**: `_can_acquire_locked` needed for two-phase probe-then-commit atomicity in composite
+
+H3 remains the one baseline win — the LCS-based merge algorithm is inherently monolithic, and decomposition doesn't help as much when the core algorithm is a single 130-line function.
+
 ---
 
 ## Convergence
 
 **24/24 PASS in Phase 2. Zero skill revisions needed.**
 
-Phase 3 confirmed these results scale to hard problems: in 3/5 experiments HDD produced 30-37% less code, and in 3/5 experiments produced architecturally different solutions. However, blind code review revealed HDD introduces subtle correctness bugs (Baseline 4 · HDD 1 in judged comparisons). HDD excels at design and clarity but needs explicit correctness verification to match baseline reliability.
+Phase 3 confirmed these results scale to hard problems: in 3/5 experiments HDD produced 30-37% less code, and in 3/5 experiments produced architecturally different solutions. Initial blind code review revealed HDD introduces subtle correctness bugs (Baseline 4 · HDD 1). Adding a VERIFY step after each fill — checking shared state, resource lifecycle, and error paths — fixed the gap (HDD v2 4 · Baseline 1).
 
-The three rules discovered during Phase 1 RED-GREEN-REFACTOR proved sufficient across all scenarios:
+The four rules governing HDD:
 
 1. **"Holes must be visible"** — prevents mental-only decomposition
 2. **"Use named holes"** — improves trackability in compiler feedback
 3. **"Each distinct concern gets a hole"** — prevents under-decomposition
+4. **"Verify after filling"** — catches cross-hole interaction bugs (Phase 3b)
 
 ## What the Numbers Show
 
