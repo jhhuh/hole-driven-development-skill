@@ -19,7 +19,12 @@ Implement top-down by decomposition. Start with the outermost structure, leave *
 3. Pick the most constrained hole (fewest valid fills)
 4. Determine what the hole needs (type, contract, inputs available)
 5. Fill ONE hole in the file — introduce sub-holes if the fill is itself complex
-6. Repeat from 3 until no holes remain
+6. VERIFY the fill against previously filled code:
+   - Shared mutable state: is access synchronized?
+   - Lifecycle: are acquire/release scopes matched across holes?
+   - Error/cancel paths: do they clean up resources from other holes?
+   If any check fails, fix before proceeding.
+7. Repeat from 3 until no holes remain
 ```
 
 **Holes must be visible.** Write holes to the file, not just in your reasoning. Each iteration of the loop edits the file — the human should see the skeleton evolve in their editor.
@@ -32,7 +37,7 @@ Implement top-down by decomposition. Start with the outermost structure, leave *
 
 ## Success Criterion
 
-No holes remain and the code satisfies the original intention.
+No holes remain, the code satisfies the original intention, and no cross-hole interaction bugs remain.
 
 ## What This Skill Does NOT Cover
 
@@ -48,5 +53,6 @@ No holes remain and the code satisfies the original intention.
 - Skipping hole analysis ("I already know the answer")
 - Writing the final code directly and claiming you "decomposed mentally"
 - Creating artificial decomposition for trivial one-liners (1-2 lines of obvious code)
+- Skipping the VERIFY step after filling ("it's obviously correct in context")
 
 **If you catch yourself doing any of these: STOP. Delete. Start with holes in the file.**

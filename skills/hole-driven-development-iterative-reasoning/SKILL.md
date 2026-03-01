@@ -45,7 +45,12 @@ Each hole has: a number, a description of what it does, and what type/contract i
    - What constraints apply?
 5. FILL exactly one hole in the file — introduce sub-holes if complex
 6. VALIDATE (optional): run type checker if available (see table below)
-7. Repeat from 3 until no holes remain
+7. VERIFY cross-hole interactions: for each filled hole sharing state with this fill:
+   - Shared mutable state: is access properly synchronized?
+   - Resource lifecycle: are acquire/release scopes correct across hole boundaries?
+   - Error/cancellation paths: do they propagate correctly to other holes?
+   Fix any issue before continuing.
+8. Repeat from 3 until no holes remain
 ```
 
 **One hole per iteration.** Fill one, reassess, then pick the next.
@@ -53,6 +58,8 @@ Each hole has: a number, a description of what it does, and what type/contract i
 **Each distinct concern gets a hole.** When the spec has N distinct requirements or sub-problems, the skeleton should have at least N holes. Don't collapse multiple concerns into one hole — that defeats the purpose of decomposition.
 
 **Reason before filling.** For each hole, explicitly state: what it needs to produce, what it has available, and why your fill is correct. Do not skip this reasoning step.
+
+**Verify after filling.** Cross-cutting concerns (concurrency, resource lifecycle, error handling) don't decompose into independent holes. After each fill, check interactions with previously filled code.
 
 ## External Validation (Optional)
 

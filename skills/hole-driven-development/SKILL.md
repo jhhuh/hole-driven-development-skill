@@ -28,8 +28,13 @@ Drive implementation through the compiler's typed hole diagnostics. Write holes,
 4. PICK the most constrained hole (fewest valid fits)
 5. FILL exactly one hole — guided by diagnostics, not memory
    - If the fill is complex, introduce sub-holes
-6. COMPILE again — go to 3
-7. EXIT when compilation succeeds (no holes remain)
+6. VERIFY semantic correctness against previously filled holes:
+   - Does shared state flow correctly between this fill and prior fills?
+   - Are resource scopes (locks, handles, channels) consistent?
+   - Do error paths compose correctly?
+   The compiler catches type errors but not logic bugs.
+7. COMPILE again — go to 3
+8. EXIT when compilation succeeds (no holes remain)
 ```
 
 **One hole per compile cycle.** Fill one, compile, read. Do not batch-fill.
