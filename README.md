@@ -70,6 +70,8 @@ After revealing labels, the judges commented:
 
 Full results: **[jhhuh.github.io/hole-driven-development-skill](https://jhhuh.github.io/hole-driven-development-skill/)**
 
+The methodology used to build these skills (blind A/B assessment, experiment design with phase progression, iterative improvement with anti-overfitting) has been extracted into its own reusable skills: **[experiment-driven-skill-development](https://github.com/jhhuh/experiment-driven-skill-development)**
+
 ## Installation
 
 ```bash
