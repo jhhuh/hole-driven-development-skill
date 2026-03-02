@@ -1,0 +1,51 @@
+site_name: Experiment-Driven Skill Development
+site_description: Three Claude Code skills for developing, validating, and improving AI agent skills through blind A/B experimentation
+site_url: https://jhhuh.github.io/experiment-driven-skill-development/
+repo_url: https://github.com/jhhuh/experiment-driven-skill-development
+repo_name: jhhuh/experiment-driven-skill-development
+
+docs_dir: docs-site
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - content.code.copy
+    - navigation.sections
+    - toc.integrate
+
+markdown_extensions:
+  - tables
+  - admonition
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - Skills:
+    - Blind Skill Assessment: skills/blind-skill-assessment.md
+    - Experiment Set Design: skills/experiment-set-design.md
+    - Iterative Skill Refinement: skills/iterative-skill-refinement.md
+  - Results: results.md
+  - Origin Story: origin.md
